@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Game Hub</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+
+body{
+  margin:0;
+  background:#f5f5f5;
+  color:#111;
+}
+
+/* ===== HEADER ===== */
+.header{
+  background:#ffffff;
+  padding:16px;
+  font-size:20px;
+  font-weight:600;
+  border-bottom:1px solid #e0e0e0;
+}
+
+/* ===== LIST ===== */
+.game-list{
+  padding:6px 0;
+}
+
+/* ===== ITEM ===== */
+.game-item{
+  display:flex;
+  align-items:center;
+  background:#fff;
+  margin:8px 12px;
+  padding:12px;
+  border-radius:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+
+/* ===== IMAGE ICON ===== */
+.game-icon{
+  width:56px;
+  height:56px;
+  border-radius:12px;
+  object-fit:cover;
+  margin-right:12px;
+  background:#ddd;
+}
+
+/* ===== INFO ===== */
+.game-info{
+  flex:1;
+}
+.game-name{
+  font-size:16px;
+  font-weight:600;
+}
+.game-desc{
+  font-size:13px;
+  color:#666;
+  margin-top:2px;
+}
+
+/* ===== BUTTON ===== */
+.play-btn{
+  background:#1a73e8;
+  color:#fff;
+  border:0;
+  padding:8px 14px;
+  border-radius:20px;
+  font-size:13px;
+}
+.play-btn:active{
+  opacity:.7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">🎮 Game của tôi</div>
+
+<div class="game-list">
+
+  <!-- GAME 1 -->
+  <div class="game-item">
+    <img class="game-icon" src="https://i.imgur.com/8QfKQkO.png">
+    <div class="game-info">
+      <div class="game-name">Run 3</div>
+      <div class="game-desc">Chạy vô tận trong không gian</div>
+    </div>
+    <button class="play-btn" onclick="go('run3.html')">Chơi</button>
+  </div>
+
+  <!-- GAME 2 -->
+  <div class="game-item">
+    <img class="game-icon" src="https://i.imgur.com/z4d4kWk.png">
+    <div class="game-info">
+      <div class="game-name">Monkey Mart</div>
+      <div class="game-desc">Quản lý siêu thị vui nhộn</div>
+    </div>
+    <button class="play-btn" onclick="go('monkeymart.html')">Chơi</button>
+  </div>
+
+  <!-- GAME 3 -->
+  <div class="game-item">
+    <img class="game-icon" src="https://i.imgur.com/qR6K9ZG.png">
+    <div class="game-info">
+      <div class="game-name">Puzzle Game</div>
+      <div class="game-desc">Giải đố trí tuệ</div>
+    </div>
+    <button class="play-btn" onclick="go('#')">Chơi</button>
+  </div>
+
+  <!-- GAME 4 -->
+  <div class="game-item">
+    <img class="game-icon" src="https://i.imgur.com/2ZL2E9B.png">
+    <div class="game-info">
+      <div class="game-name">Racing Game</div>
+      <div class="game-desc">Đua xe tốc độ cao</div>
+    </div>
+    <button class="play-btn" onclick="go('#')">Chơi</button>
+  </div>
+
+  <!-- GAME 5 -->
+  <div class="game-item">
+    <img class="game-icon" src="https://i.imgur.com/W4bYpQm.png">
+    <div class="game-info">
+      <div class="game-name">Zombie Survival</div>
+      <div class="game-desc">Sinh tồn hậu tận thế</div>
+    </div>
+    <button class="play-btn" onclick="go('#')">Chơi</button>
+  </div>
+
+  <!-- COPY THÊM ĐỂ ĐỦ 12–20 GAME -->
+
+</div>
+
+<script>
+function go(url){
+  location.href = url;
+}
+</script>
+
+</body>
+</html>
