@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head><base href='https://cdn.jsdelivr.net/gh/faralong/all@main/hitbutton/' /><meta name='robots' content='noindex'>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name ="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta charset="utf-8"/>
+        <meta http-equiv="pragma" content="no-cache"/>
+        
+        <style>
+            body {
+                background: #000000;
+                color: #cccccc;
+                margin: 0px;
+                padding: 0px;
+                border: 0px;
+				overflow: hidden;
+            }
+            canvas {
+                image-rendering: optimizeSpeed;
+                -webkit-interpolation-mode: nearest-neighbor;
+                -ms-touch-action: none;
+                touch-action: none;
+                margin: 0px;
+                padding: 0px;
+                border: 0px;
+            }
+			#canvas {
+				display: block;
+				margin: 0 auto;
+			}
+			#loading_screen {
+				left: 0px !important;
+				width: 100%;
+				height: 100%;
+				object-fit: contain;
+			}
+            :-webkit-full-screen #canvas {
+                width: 100%;
+                height: 100%;
+            }
+            :-webkit-full-screen {
+                width: 100%;
+                height: 100%;
+            } 
+        </style>		
+    
+          <style type="text/css">
+            .no-select {
+            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none; /* Safari */
+            -khtml-user-select: none; /* Konqueror HTML */
+            -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+            }
+          </style>
+        
+          <script type="text/javascript">
+            setTimeout(function(){
+              if(document.getElementsByTagName("canvas").length) {
+                document.getElementsByTagName("body")[0].classList.add("no-select")
+              }
+            }, 2000);
+          </script>
+          
+        </head>
+    <body onload="startResizing();">
+		<canvas id="canvas" width="1920" height="1080" >
+			<p>Your browser doesn't support HTML5 canvas.</p>
+		</canvas>
+        <script type="text/javascript" src="html5game/Just Hit The Buttonn.js"></script>
+        <script>window.onload = GameMaker_Init;</script>
+		<script>
+			startResizing();
+			function startResizing(){
+				resizing();
+				setInterval(resizing, 1000)
+			}
+			function resizing(){
+				var 
+				browserWidth 	= window.innerWidth,
+				browserHeight	= window.innerHeight,
+				gameWidth		= 1920,
+				gameHeight		= 1080,
+				scale			= Math.min(browserWidth / gameWidth, browserHeight / gameHeight);
+				document.getElementById('canvas').setAttribute("style", "width:" + (gameWidth * scale) + "px");
+				document.getElementById('canvas').setAttribute("style", "height:" + (gameHeight * scale) + "px");
+				document.getElementById('canvas').style.cursor = 'none';
+			}
+		</script>
+    <script>function fnSendMsg(evt){
+          if(typeof window.parent.postMessage == 'function') {
+            window.parent.postMessage('keypress-from-game', '*');
+          } else if(typeof window.top.postMessage == 'function' && window.top != window.self) {
+            window.top.postMessage('keypress-from-game', '*');
+          }
+        }
+        document.body.addEventListener('click', function(event) {
+          fnSendMsg(event);
+        });
+        document.addEventListener('keypress', function(event) {
+        	 fnSendMsg(event);
+        });
+        document.addEventListener('keydown', function (e) {
+        	 fnSendMsg(event);
+        });
+        document.addEventListener('keyup', function (e) {
+        	  fnSendMsg(event);
+        });
+        </script></body>
+</html>            <!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <base href="https://cdn.jsdelivr.net/gh/genizy/braybray/aquapark-io/">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Aquapark IO Unblocked</title>
+  <link rel="stylesheet" href="TemplateData/css/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="igroutka.ru" />
+  <link rel="canonical" href="https://igroutka.ru/" />
+  <script src="Build/UnityLoader.js"></script>
+  <script src="TemplateData/load.js"></script>
+</head>
+
+<body>
+  <div class="keepRatio">
+    <div class="webgl-content">
+      <button class="icon-resize-full" id="fullScreenButton" onclick="ToggleFullScreen()"></button>
+      <a id="logoname" style="display:none;" href="https://igroutka.ru/" target="_blank">igroutka.ru</a>
+      <div id="gameContainer"></div>
+    </div>
+    <div id="loadingBlock">
+      <h1 class="subtitle">Aquapark.io</h1>
+      <script type="text/javascript" style="display:none">
+        window.__mirage2 = {
+          petok: "aCj.QNwGUOfLrCmu67eagpL0xPleX_OUL2kyVMsyHGk-31536000-0"
+        };
+      </script>
+      <script type="text/javascript" src="patch/cdn/mirage2.min.js"></script>
+      <img class="logo-game" data-cfsrc="Aquaparkio512.jpg" style="display:none;visibility:hidden;" /><noscript><img class="logo-game" src="Aquaparkio512.jpg" /></noscript>
+      <div id="progressBar">
+        <div style="margin-bottom:5px">Loading ...</div>
+        <div class="centered emptyBarbg">
+          <div id="emptyBar"></div>
+          <div id="fullBar"></div>
+        </div>
+      </div>
+      <div id="warningBrowserBlock" style="display:none;">
+        <div class="warningBrowserText"> Your browser may not be compatible with this website. For an optimal experience, we suggest you to download one of this popular web browsers. </div>
+        <div class="browserIcons">
+          <span>Firefox browser</span>
+          <span>Chrome browser</span>
+          <span>Safari browser</span>
+        </div>
+      </div>
+      <div id="warningMobileBlock" style="display:none;">
+      </div>
+      <div class="cover" style="background-image: url(Aquaparkio512.jpg)"></div>
+    </div>
+    <div id="errorBrowserBlock" style="display:none;">
+      <div id="errorContent">
+        <div id="errorBrowserText"> Your browser does not support WebGL. <br> You can download one of this popular web browsers. </div>
+        <div class="browserIcons">
+          <span>Firefox browser</span>
+          <span>Chrome browser</span>
+          <span>Safari browser</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(a, b, c) {
+      var d = a.getElementsByTagName(b)[0];
+      a.getElementById(c) || (a = a.createElement(b), a.id = c, a.src = "patch/js/gm-sdk-preload.js?v=" + Date.now(), d.parentNode.insertBefore(a, d))
+    })(document, "script", "gamemonetize-preload-api");
+  </script>
+  <script src="js/analytics_ubg_v1_4.js"></script>
+  <script src="js/ubg235_client_v1_1.js"></script>
+</body>
+
+</html>            
