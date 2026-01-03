@@ -6,145 +6,221 @@
 <title>Game Hub</title>
 
 <style>
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffffee;
+  --text:#111;
+  --sub:#666;
+  --blue:#2563eb;
+
+  --grad-header: linear-gradient(135deg,#eef3ff,#f5faff,#ecfff6);
+  --grad-btn: linear-gradient(135deg,#2563eb,#4f8df7);
+  --grad-hot: linear-gradient(135deg,#ff5f6d,#ffc371);
+  --grad-new: linear-gradient(135deg,#43e97b,#38f9d7);
+}
+
 *{
   box-sizing:border-box;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  -webkit-tap-highlight-color:transparent;
 }
 
 body{
   margin:0;
-  background:#f5f5f5;
-  color:#111;
+  background:
+    radial-gradient(circle at top,#ffffff 0%,transparent 60%),
+    var(--bg);
+  color:var(--text);
 }
 
 /* ===== HEADER ===== */
 .header{
-  background:#ffffff;
-  padding:16px;
-  font-size:20px;
-  font-weight:600;
-  border-bottom:1px solid #e0e0e0;
+  background:var(--grad-header);
+  padding:18px;
+  font-size:22px;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid #e3e6ee;
+}
+.header span{ font-size:24px; }
+
+/* ===== BANNER ===== */
+.banner-wrap{
+  margin:14px;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:0 14px 32px rgba(0,0,0,.12);
+  background:#fff;
+}
+.banner-track{
+  display:flex;
+  transition:transform .45s cubic-bezier(.4,0,.2,1);
+}
+.banner{
+  min-width:100%;
+  height:180px;
+}
+.banner img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-/* ===== LIST ===== */
-.game-list{
-  padding:6px 0;
+/* DOTS */
+.dots{
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:10px;
 }
+.dot{
+  width:7px;height:7px;
+  border-radius:50%;
+  background:#cfd6e6;
+}
+.dot.active{ background:var(--blue); }
 
-/* ===== ITEM ===== */
+/* ===== GAME LIST ===== */
+.game-list{ padding-bottom:30px; }
+
 .game-item{
   display:flex;
   align-items:center;
-  background:#fff;
-  margin:8px 12px;
-  padding:12px;
-  border-radius:12px;
-  box-shadow:0 1px 3px rgba(0,0,0,.08);
+  background:var(--card);
+  backdrop-filter:blur(10px);
+  margin:12px;
+  padding:14px;
+  border-radius:22px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+  transition:transform .15s ease;
 }
+.game-item:active{ transform:scale(.97); }
 
-/* ===== IMAGE ICON ===== */
+/* ICON */
 .game-icon{
-  width:56px;
-  height:56px;
-  border-radius:12px;
+  width:70px;height:70px;
+  border-radius:20px;
   object-fit:cover;
-  margin-right:12px;
-  background:#ddd;
+  margin-right:14px;
 }
 
-/* ===== INFO ===== */
-.game-info{
-  flex:1;
-}
-.game-name{
-  font-size:16px;
+/* INFO */
+.game-info{ flex:1; }
+.game-name{ font-size:16px;font-weight:800; }
+.game-meta{ font-size:12px;color:var(--sub);margin-top:4px; }
+
+/* TAGS */
+.tags{ display:flex; gap:6px;margin-top:6px; }
+.tag{
+  font-size:11px;
+  padding:4px 10px;
+  border-radius:999px;
+  color:#fff;
   font-weight:600;
 }
-.game-desc{
-  font-size:13px;
-  color:#666;
-  margin-top:2px;
-}
+.tag.hot{ background:var(--grad-hot); }
+.tag.new{ background:var(--grad-new); }
 
-/* ===== BUTTON ===== */
+/* ACTION */
+.game-action{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+}
+.rating{ font-size:12px;color:#666;margin-bottom:8px; }
 .play-btn{
-  background:#1a73e8;
+  background:var(--grad-btn);
   color:#fff;
   border:0;
-  padding:8px 14px;
-  border-radius:20px;
+  padding:8px 20px;
+  border-radius:999px;
   font-size:13px;
+  font-weight:600;
+  box-shadow:0 8px 18px rgba(37,99,235,.35);
 }
-.play-btn:active{
-  opacity:.7;
-}
+.play-btn:active{ opacity:.85; }
 </style>
 </head>
 
 <body>
 
-<div class="header">🎮 Game của tôi</div>
+<div class="header"><span>🎮</span> Game Hub</div>
 
+<!-- ===== BANNER ===== -->
+<div class="banner-wrap">
+  <div class="banner-track" id="track">
+    <div class="banner"><img src="https://images.unsplash.com/photo-1511512578047-dfb367046420"></div>
+    <div class="banner"><img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f"></div>
+    <div class="banner"><img src="https://images.unsplash.com/photo-1605902711622-cfb43c44367f"></div>
+  </div>
+</div>
+
+<div class="dots" id="dots">
+  <div class="dot active"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+</div>
+
+<!-- ===== GAME LIST ===== -->
 <div class="game-list">
 
-  <!-- GAME 1 -->
-  <div class="game-item">
-    <img class="game-icon" src="https://i.imgur.com/8QfKQkO.png">
-    <div class="game-info">
-      <div class="game-name">Run 3</div>
-      <div class="game-desc">Chạy vô tận trong không gian</div>
-    </div>
-    <button class="play-btn" onclick="go('run3.html')">Chơi</button>
+<!-- TEMPLATE GAME -->
+<script>
+function game(icon,name,meta,tag,plays,link){
+document.write(`
+<div class="game-item">
+  <img class="game-icon" src="${icon}">
+  <div class="game-info">
+    <div class="game-name">${name}</div>
+    <div class="game-meta">${meta}</div>
+    <div class="tags">${tag?`<span class="tag ${tag}">${tag.toUpperCase()}</span>`:''}</div>
   </div>
-
-  <!-- GAME 2 -->
-  <div class="game-item">
-    <img class="game-icon" src="https://i.imgur.com/z4d4kWk.png">
-    <div class="game-info">
-      <div class="game-name">Monkey Mart</div>
-      <div class="game-desc">Quản lý siêu thị vui nhộn</div>
-    </div>
-    <button class="play-btn" onclick="go('monkeymart.html')">Chơi</button>
+  <div class="game-action">
+    <div class="rating">${plays}</div>
+    <button class="play-btn" onclick="go('${link}')">Chơi</button>
   </div>
+</div>`);
+}
 
-  <!-- GAME 3 -->
-  <div class="game-item">
-    <img class="game-icon" src="https://i.imgur.com/qR6K9ZG.png">
-    <div class="game-info">
-      <div class="game-name">Puzzle Game</div>
-      <div class="game-desc">Giải đố trí tuệ</div>
-    </div>
-    <button class="play-btn" onclick="go('#')">Chơi</button>
-  </div>
-
-  <!-- GAME 4 -->
-  <div class="game-item">
-    <img class="game-icon" src="https://i.imgur.com/2ZL2E9B.png">
-    <div class="game-info">
-      <div class="game-name">Racing Game</div>
-      <div class="game-desc">Đua xe tốc độ cao</div>
-    </div>
-    <button class="play-btn" onclick="go('#')">Chơi</button>
-  </div>
-
-  <!-- GAME 5 -->
-  <div class="game-item">
-    <img class="game-icon" src="https://i.imgur.com/W4bYpQm.png">
-    <div class="game-info">
-      <div class="game-name">Zombie Survival</div>
-      <div class="game-desc">Sinh tồn hậu tận thế</div>
-    </div>
-    <button class="play-btn" onclick="go('#')">Chơi</button>
-  </div>
-
-  <!-- COPY THÊM ĐỂ ĐỦ 12–20 GAME -->
+game("https://i.imgur.com/8QfKQkO.png","Run 3","Arcade • Runner • ★4.6","hot","120K chơi","run3.html");
+game("https://i.imgur.com/z4d4kWk.png","Monkey Mart","Simulation • ★4.8","new","89K chơi","monkeymart.html");
+game("https://i.imgur.com/qR6K9ZG.png","Stickman Hook","Arcade • Physics • ★4.5","","77K chơi","#");
+game("https://i.imgur.com/W4bYpQm.png","Zombie Survival","Action • Horror • ★4.4","hot","64K chơi","#");
+game("https://i.imgur.com/2ZL2E9B.png","Racing Thunder","Racing • Speed • ★4.3","","52K chơi","#");
+game("https://i.imgur.com/0XKznzD.png","Pixel Adventure","Platform • Retro • ★4.6","new","41K chơi","#");
+game("https://i.imgur.com/Ej5xj0E.png","Sniper Elite","Shooter • FPS • ★4.7","hot","95K chơi","#");
+game("https://i.imgur.com/BYqWQ1W.png","Tower Defense","Strategy • TD • ★4.5","","36K chơi","#");
+game("https://i.imgur.com/1h8VbJ8.png","Car Simulator","Simulation • Drive • ★4.2","","29K chơi","#");
+game("https://i.imgur.com/bk8S1xA.png","Idle Miner","Idle • Management • ★4.6","new","80K chơi","#");
+game("https://i.imgur.com/z1Y9ZJz.png","Battle Arena","Fighting • PvP • ★4.4","hot","68K chơi","#");
+game("https://i.imgur.com/V7FJZ0E.png","Puzzle Brain","Puzzle • Logic • ★4.8","","55K chơi","#");
+</script>
 
 </div>
 
 <script>
-function go(url){
-  location.href = url;
+function go(url){ location.href=url; }
+
+/* SLIDER */
+let index=0;
+const track=document.getElementById("track");
+const dots=document.querySelectorAll(".dot");
+function show(i){
+ index=(i+3)%3;
+ track.style.transform=`translateX(-${index*100}%)`;
+ dots.forEach((d,n)=>d.classList.toggle("active",n===index));
 }
+setInterval(()=>show(index+1),4000);
+
+let sx=0;
+track.addEventListener("touchstart",e=>sx=e.touches[0].clientX);
+track.addEventListener("touchend",e=>{
+ let dx=e.changedTouches[0].clientX-sx;
+ if(dx>50) show(index-1);
+ if(dx<-50) show(index+1);
+});
 </script>
 
 </body>
