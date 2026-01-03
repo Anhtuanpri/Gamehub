@@ -1,0 +1,512 @@
+<!DOCTYPE html>  
+<html lang="vi">  
+<head>  
+<meta charset="UTF-8">  
+<title>Cờ Caro Online - VIP</title>  
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
+  
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>  
+  
+<style>  
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');  
+  
+:root{  
+  --bg:#0a0e27;  
+  --card:rgba(255,255,255,.05);  
+  --x:#00ff88;  
+  --o:#ff0080;  
+  --gold:#ffd700;  
+}  
+  
+*{  
+  margin:0;  
+  padding:0;  
+  box-sizing:border-box;  
+  -webkit-tap-highlight-color: transparent; /* Tắt highlight khi bấm trên mobile */
+}  
+  
+body{  
+  font-family:'Orbitron',system-ui,Arial;  
+  color:#fff;  
+  text-align:center;  
+  background:#0a0e27;  
+  min-height:100vh;  
+  overflow-x:hidden;  
+  position:relative;  
+}  
+  
+/* ANIMATED BACKGROUND */  
+body::before{  
+  content:'';  
+  position:fixed;  
+  width:200%;  
+  height:200%;  
+  top:-50%;  
+  left:-50%;  
+  z-index:0;  
+  background:  
+    radial-gradient(circle at 20% 30%, rgba(0,255,136,.15) 0%, transparent 50%),  
+    radial-gradient(circle at 80% 70%, rgba(255,0,128,.15) 0%, transparent 50%),  
+    radial-gradient(circle at 50% 50%, rgba(255,215,0,.1) 0%, transparent 40%);  
+  animation:drift 20s infinite linear;  
+}  
+  
+@keyframes drift{  
+  0%{transform:rotate(0deg) scale(1)}  
+  50%{transform:rotate(180deg) scale(1.1)}  
+  100%{transform:rotate(360deg) scale(1)}  
+}  
+  
+.hidden{display:none!important}  
+  
+/* CONTAINER */  
+#home,#game{  
+  width: 95%; /* Chiếm 95% màn hình mobile */
+  max-width:600px;  
+  margin:20px auto;  
+  padding:20px;  
+  background:rgba(10,14,39,.9);  
+  backdrop-filter:blur(20px);  
+  border-radius:24px;  
+  border:2px solid rgba(255,215,0,.3);  
+  box-shadow: 0 0 40px rgba(255,215,0,.2);  
+  position:relative;  
+  z-index:1;  
+}  
+  
+/* TITLE */  
+h2{  
+  font-size:clamp(20px,5vw,36px);  
+  font-weight:900;  
+  margin: 20px 0;
+  background:linear-gradient(135deg,var(--x),var(--gold),var(--o));  
+  -webkit-background-clip:text;  
+  background-clip:text;  
+  -webkit-text-fill-color:transparent;  
+  text-shadow:0 0 30px rgba(255,215,0,.5);  
+  letter-spacing:2px;  
+}  
+  
+/* INPUT & SELECT */  
+input,button,select{  
+  padding:15px;  
+  margin:8px 0;  
+  width: 100%; /* Full width */
+  border-radius:14px;  
+  border:none;  
+  font-size:16px;  
+  font-family:'Orbitron',sans-serif;  
+}  
+  
+input, select{  
+  background:rgba(255,255,255,.08);  
+  border:2px solid rgba(255,215,0,.2);  
+  color:#fff;  
+}  
+  
+select option { background: #0a0e27; color: #fff; }  
+  
+input:focus, select:focus{  
+  outline:none;  
+  border-color:var(--gold);  
+}  
+  
+button{  
+  background:linear-gradient(135deg,var(--x),var(--gold));  
+  color:#000;  
+  font-weight:700;  
+  cursor:pointer;  
+  text-transform:uppercase;  
+  margin-top: 15px;
+}  
+  
+.btn-clear{  
+  background:linear-gradient(135deg,#ff0080,#ff4040);  
+  font-size:14px;  
+  margin-top: 10px;
+}  
+  
+/* VERSUS SECTION */  
+#versus{  
+  display:flex;  
+  justify-content:space-between;  
+  align-items:center;  
+  padding:10px;  
+  background:rgba(255,215,0,.05);  
+  border-radius:16px;  
+  border:1px solid rgba(255,215,0,.2);  
+  margin-bottom: 15px;
+}  
+  
+.vs-player{  
+  display:flex;  
+  flex-direction:column;  
+  align-items:center;  
+  width: 30%; /* Cố định chiều rộng để không bị đẩy */
+}  
+  
+.avatar-wrap, .preview-avatar-wrap{  
+  position:relative;  
+  width:60px; /* Thu nhỏ avatar trên mobile */
+  height:60px;  
+  margin-bottom: 5px;
+}  
+  
+.avatar, #previewAvatar{  
+  position:absolute;  
+  top:50%; left:50%;  
+  transform:translate(-50%,-50%);  
+  width:54px; height:54px;  
+  object-fit:cover;  
+  border-radius:8px;  
+  background:#1e293b;  
+  border:2px solid rgba(255,215,0,.3);  
+}  
+  
+.frame, .preview-frame{  
+  position:absolute; top:0; left:0;  
+  width:100%; height:100%;  
+  pointer-events:none;  
+  z-index: 2;
+}  
+  
+#sword{ font-size:24px; animation:pulse 2s infinite; }  
+  
+.vs-player strong{  
+  font-size:12px;  
+  white-space: nowrap;  
+  overflow: hidden;  
+  text-overflow: ellipsis;  
+  width: 100%;  
+}  
+  
+/* --- BOARD (ĐÃ SỬA LỖI VỠ) --- */  
+#board-container {
+    width: 100%;
+    max-width: 500px; /* Giới hạn trên PC */
+    aspect-ratio: 1 / 1; /* Luôn luôn vuông */
+    margin: 0 auto;
+    background:rgba(0,0,0,.3);  
+    border-radius:12px;  
+    border:2px solid rgba(255,215,0,.2);  
+    padding: 5px; /* Padding nhỏ để tránh tràn */
+    overflow: hidden; /* Cắt bỏ phần thừa nếu có */
+}
+
+#board{  
+  display:grid;  
+  width: 100%;
+  height: 100%;
+  /* Grid template columns được set bởi JS */
+}  
+  
+.cell{  
+  width: 100%;
+  height: 100%;
+  background:linear-gradient(135deg,#1a1f3a,#0f1729);  
+  border-radius:2px; /* Bo góc cực nhỏ */
+  display:flex;  
+  align-items:center;  
+  justify-content:center;  
+  font-weight:900;  
+  cursor:pointer;  
+  border:1px solid rgba(255,215,0,.05);  
+  user-select: none;
+  overflow: hidden; /* Chữ to quá thì ẩn, không đẩy khung */
+}  
+  
+.cell.X{ color:var(--x); text-shadow:0 0 5px var(--x); }  
+.cell.O{ color:var(--o); text-shadow:0 0 5px var(--o); }  
+  
+/* STATUS & TIMER */  
+#status{  
+  margin:15px 0;  
+  font-weight:700;  
+  font-size:14px;  
+  padding:10px;  
+  border-radius:8px;  
+  background:rgba(255,215,0,.1);  
+  border:1px solid rgba(255,215,0,.3);  
+}  
+  
+#timers{ display:flex; gap:10px; margin-top:10px; }  
+.timer{  
+  flex:1; padding:10px;  
+  border-radius:8px;  
+  background:rgba(0,0,0,.4);  
+  font-size:12px; font-weight:700;  
+}  
+  
+/* PREVIEW */  
+#previewWrap{ display:none; margin:10px auto; }  
+.preview-avatar-wrap{ width:80px; height:80px; margin:0 auto; }
+#previewAvatar { width:72px; height:72px; }
+
+</style>  
+</head>  
+  
+<body>  
+  
+<h2>⚡ CỜ CARO VIP ⚡</h2>  
+  
+<div id="home">  
+  <input id="inpName" placeholder="👤 Tên của bạn" autocomplete="off">  
+  <input id="inpAvatar" placeholder="🖼️ Link Avatar (Tùy chọn)" autocomplete="off">  
+    
+  <div id="previewWrap">  
+    <div class="preview-avatar-wrap">  
+      <img id="previewAvatar" src="">  
+      <img class="preview-frame" src="https://i.postimg.cc/FFqqqbzz/khung-vip-303.gif">  
+    </div>  
+    <p style="font-size:12px;color:var(--x);">PREVIEW</p>  
+  </div>  
+  
+  <select id="inpSize">
+    <option value="15" selected>🎲 15x15 (Chuẩn - Thắng 5)</option>
+    <option value="10">🎲 10x10 (Nhanh - Thắng 5)</option>
+    <option value="5">🎲 5x5 (Mini - Thắng 5)</option>
+    <option value="3">🎲 3x3 (Vui - Thắng 3)</option>
+  </select>
+    
+  <input id="inpRoom" placeholder="🎮 Mã Phòng (6 số)" maxlength="6" type="tel" autocomplete="off">  
+    
+  <button id="btnJoin">🚀 VÀO CHIẾN NGAY</button>  
+  <button class="btn-clear" id="btnClearStorage">Xóa dữ liệu cũ</button>  
+</div>  
+  
+<div id="game" class="hidden">  
+  <div id="versus">  
+    <div class="vs-player" id="playerX"></div>  
+    <div id="sword">⚔️</div>  
+    <div class="vs-player" id="playerO"></div>  
+  </div>  
+  
+  <div id="board-container">
+      <div id="board"></div>  
+  </div>
+
+  <div id="status">Đang tải...</div>  
+  
+  <div id="timers">  
+    <div class="timer" id="turnTimer">⏱ Lượt: --</div>  
+    <div class="timer" id="matchTimer">⌛ Ván: 15:00</div>  
+  </div>  
+  
+  <button class="btn-clear" id="btnLeave">🚪 Thoát phòng</button>  
+</div>  
+  
+<script>  
+/* CONFIG */  
+let BOARD_SIZE = 15;   
+const TURN_LIMIT = 15000;  
+const MATCH_LIMIT = 15 * 60 * 1000;  
+const FRAME_GIF = "https://i.postimg.cc/FFqqqbzz/khung-vip-303.gif";  
+  
+/* FIREBASE */  
+firebase.initializeApp({  
+  apiKey:"AIzaSyBdKC3vCBjHhsakrE1hUYg-2_Vi9JYX3vk",  
+  databaseURL:"https://noitu-7dca6-default-rtdb.asia-southeast1.firebasedatabase.app",  
+  projectId:"noitu-7dca6"  
+});  
+const db = firebase.database();  
+  
+/* DOM */  
+const home=document.getElementById("home");  
+const game=document.getElementById("game");  
+const boardDiv=document.getElementById("board");  
+const statusEl=document.getElementById("status");  
+const turnTimerEl=document.getElementById("turnTimer");  
+const matchTimerEl=document.getElementById("matchTimer");  
+const pX=document.getElementById("playerX");  
+const pO=document.getElementById("playerO");  
+const inpName=document.getElementById("inpName");  
+const inpAvatar=document.getElementById("inpAvatar");  
+const inpRoom=document.getElementById("inpRoom");  
+const inpSize=document.getElementById("inpSize");  
+const previewWrap=document.getElementById("previewWrap");  
+const previewAvatar=document.getElementById("previewAvatar");  
+  
+let myRole="", roomId="", uid=localStorage.uid||(localStorage.uid=Math.random().toString(36).substr(2,9));  
+let timerInt=null;  
+  
+/* SETUP */  
+window.onload = function() {  
+  if(localStorage.getItem('playerName_'+uid)) inpName.value = localStorage.getItem('playerName_'+uid);  
+  const avt = localStorage.getItem('playerAvatar_'+uid);  
+  if(avt) { inpAvatar.value = avt; previewAvatar.src = avt; previewWrap.style.display = 'block'; }  
+};  
+  
+inpAvatar.oninput = function() {  
+  const url = inpAvatar.value.trim();  
+  if(url) { previewAvatar.src = url; previewWrap.style.display = 'block'; }  
+  else previewWrap.style.display = 'none';  
+};  
+  
+document.getElementById("btnClearStorage").onclick = () => {  
+  if(confirm("Xóa tên & avatar đã lưu?")) {  
+    localStorage.clear(); location.reload();  
+  }  
+};  
+  
+/* JOIN ROOM */  
+document.getElementById("btnJoin").onclick = function() {  
+  const name = inpName.value.trim();  
+  const avatar = inpAvatar.value.trim();  
+  const sizeVal = parseInt(inpSize.value);  
+  roomId = inpRoom.value.trim();  
+    
+  if(!name || !roomId || roomId.length!==6) return alert("⚠️ Tên và Mã phòng (6 số) là bắt buộc!");  
+  
+  localStorage.setItem('playerName_'+uid, name);  
+  if(avatar) localStorage.setItem('playerAvatar_'+uid, avatar);  
+  
+  home.classList.add("hidden");  
+  game.classList.remove("hidden");  
+  
+  db.ref("rooms/"+roomId).transaction(r=>{  
+    if(!r){  
+      r={ boardSize: sizeVal, board:Array(sizeVal*sizeVal).fill(""), players:{}, turn:"X", startTime:Date.now(), turnTime:Date.now(), winner:null };  
+    }  
+    // Logic gán người chơi  
+    if(r.players.X && r.players.X.id===uid) { myRole="X"; r.players.X.name=name; r.players.X.avatar=avatar; return r; }  
+    if(r.players.O && r.players.O.id===uid) { myRole="O"; r.players.O.name=name; r.players.O.avatar=avatar; return r; }  
+    if(!r.players.X) { r.players.X={name,avatar,id:uid}; myRole="X"; }  
+    else if(!r.players.O) { r.players.O={name,avatar,id:uid}; myRole="O"; }  
+    return r;  
+  });  
+  
+  listen();  
+};  
+  
+/* RENDER BOARD (QUAN TRỌNG: FIX VỠ LAYOUT) */  
+function renderBoard(board, size){  
+  BOARD_SIZE = size || 15;  
+  boardDiv.innerHTML="";  
+    
+  // Tính toán kích thước ô động  
+  // Mobile thì gap nhỏ (1px), PC thì gap lớn hơn xíu (2px)  
+  const gap = BOARD_SIZE > 10 ? 1 : 2;   
+  
+  boardDiv.style.display = "grid";  
+  boardDiv.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;  
+  boardDiv.style.gap = gap + "px";  
+    
+  // Tính font size dựa trên số lượng ô  
+  // Bàn càng to font càng bé để không đẩy khung  
+  let fontSize = "20px";  
+  if(BOARD_SIZE >= 10) fontSize = "12px";  
+  if(BOARD_SIZE >= 15) fontSize = "10px"; // Font siêu nhỏ cho bàn 15  
+  
+  board.forEach((v,i)=>{  
+    const d=document.createElement("div");  
+    d.className="cell "+(v||"");  
+    d.textContent=v||"";  
+    d.style.fontSize = fontSize;  
+    d.onclick=()=>play(i);  
+    boardDiv.appendChild(d);  
+  });  
+}  
+  
+/* RENDER PLAYER */  
+function renderPlayer(div, p, s){  
+  if(!p){ div.innerHTML="<strong>waiting...</strong>"; return; }  
+  const img = p.avatar || "";  
+  div.innerHTML=`  
+    <div class="avatar-wrap">  
+      ${img ? `<img class="avatar" src="${img}">` : `<div class="avatar" style="display:flex;align-items:center;justify-content:center">?</div>`}  
+      <img class="frame" src="${FRAME_GIF}">  
+    </div>  
+    <strong style="color:${s==="X"?"var(--x)":"var(--o)"}">${p.name}</strong>  
+  `;  
+}  
+  
+/* LISTEN */  
+function listen(){  
+  db.ref("rooms/"+roomId).on("value",snap=>{  
+    const r=snap.val();   
+    if(!r) return;  
+    renderPlayer(pX, r.players.X, "X");  
+    renderPlayer(pO, r.players.O, "O");  
+    renderBoard(r.board, r.boardSize);  
+    startTimers(r);  
+    updateStatus(r);  
+  });  
+}  
+  
+function updateStatus(r){  
+    if(r.winner){  
+        statusEl.textContent = r.winner==="draw" ? "HÒA!" : (r.players[r.winner]?.name + " THẮNG!");  
+        statusEl.style.color = r.winner==="draw" ? "#fff" : "#ffd700";  
+    } else {  
+        statusEl.textContent = r.turn === myRole ? "👉 Tới lượt bạn!" : "⏳ Đợi đối thủ...";  
+        statusEl.style.color = r.turn === myRole ? "#00ff88" : "#fff";  
+    }  
+}  
+  
+/* PLAY & CHECK WIN */  
+function play(i){  
+  db.ref("rooms/"+roomId).once("value",snap=>{  
+    const r=snap.val();  
+    if(!r || r.turn!==myRole || r.board[i] || r.winner) return;  
+    r.board[i]=myRole;  
+    const win = checkWin(r.board, i, r.boardSize);  
+    const draw = !r.board.includes("");  
+      
+    let updates = { board: r.board };  
+    if(win) updates.winner = myRole;  
+    else if(draw) updates.winner = "draw";  
+    else {  
+        updates.turn = myRole==="X"?"O":"X";  
+        updates.turnTime = firebase.database.ServerValue.TIMESTAMP;  
+    }  
+    db.ref("rooms/"+roomId).update(updates);  
+  });  
+}  
+  
+function checkWin(board, pos, size){  
+  const row=Math.floor(pos/size), col=pos%size, val=board[pos];  
+  const target = size < 5 ? size : 5;  
+  const dirs = [[0,1], [1,0], [1,1], [1,-1]];  
+  for(let [dr,dc] of dirs){  
+    let c=1;  
+    for(let i=1;i<5;i++){  
+        const r=row+dr*i, c2=col+dc*i;  
+        if(r<0||r>=size||c2<0||c2>=size||board[r*size+c2]!==val) break; c++;  
+    }  
+    for(let i=1;i<5;i++){  
+        const r=row-dr*i, c2=col-dc*i;  
+        if(r<0||r>=size||c2<0||c2>=size||board[r*size+c2]!==val) break; c++;  
+    }  
+    if(c>=target) return true;  
+  }  
+  return false;  
+}  
+  
+/* TIMERS */  
+function startTimers(r){  
+  clearInterval(timerInt);  
+  if(r.winner) return;  
+  timerInt = setInterval(()=>{  
+    const now=Date.now();  
+    const turnLeft = Math.max(0, Math.ceil((TURN_LIMIT - (now-r.turnTime))/1000));  
+    turnTimerEl.textContent = "⏱ "+turnLeft+"s";  
+    if(turnLeft<=0 && !r.winner && r.turn===myRole) db.ref("rooms/"+roomId+"/winner").set(r.turn==="X"?"O":"X");  
+      
+    const matchLeft = Math.max(0, MATCH_LIMIT - (now-r.startTime));  
+    const m=Math.floor(matchLeft/60000), s=Math.floor((matchLeft%60000)/1000);  
+    matchTimerEl.textContent = `⌛ ${m}:${s<10?'0'+s:s}`;  
+  }, 1000);  
+}  
+  
+/* LEAVE */  
+document.getElementById("btnLeave").onclick = function() {  
+  if(confirm("Thoát trận?")) {  
+    clearInterval(timerInt); db.ref("rooms/"+roomId).off();  
+    if(myRole) db.ref("rooms/"+roomId+"/players/"+myRole).remove();  
+    location.reload();  
+  }  
+};  
+</script>  
+</body>  
+</html>
