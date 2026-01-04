@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Caro Quantum - Fixed Logic</title>
+    <title>Caro Quantum - Perfect Edition</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
@@ -108,6 +108,15 @@
 
         /* Popup Buttons Styling */
         .popup-action-btn { width: 100%; margin: 5px 0; padding: 12px; font-size: 14px; border-radius: 10px; }
+
+        /* Room ID Badge */
+        #roomIdDisplay {
+            text-align: center; color: rgba(255,255,255,0.5); font-size: 14px; 
+            margin-bottom: 15px; background: rgba(255,255,255,0.05); 
+            padding: 8px; border-radius: 8px; cursor: pointer; border: 1px dashed rgba(255,255,255,0.2);
+        }
+        #roomIdDisplay:active { background: rgba(255,255,255,0.1); color: #fff; }
+
     </style>
 </head>
 <body>
@@ -142,6 +151,8 @@
         <div id="game" class="game-panel hidden">
             <button class="btn-close-ui" onclick="hideUI()">✕</button>
             
+            <div id="roomIdDisplay" onclick="copyRoomId()">Phòng: ... (Chạm để sao chép)</div>
+
             <div id="overlayPopup" class="overlay-popup hidden">
                 <h3 id="popupTitle" style="color:var(--gold); margin-bottom:15px; text-align:center; padding:0 10px;">THÔNG BÁO</h3>
                 
@@ -257,6 +268,13 @@
             setTimeout(()=>t.style.display='none', 3000);
         }
 
+        window.copyRoomId = () => {
+            if(roomId) {
+                navigator.clipboard.writeText(roomId);
+                showToast("Đã sao chép mã phòng!", "info");
+            }
+        }
+
         const bgMusic = document.getElementById('bgMusic');
         const musicBtn = document.getElementById('music-control');
         let isMusicPlaying = false;
@@ -271,13 +289,13 @@
         const FRAME_GIF = "https://i.postimg.cc/FFqqqbzz/khung-vip-303.gif";
         
         let roomId="", myRole="", uid=localStorage.uid||(localStorage.uid=Math.random().toString(36).substr(2,9)); 
-        let timerInt=null;
+        let timerInt=null, isLeaving=false; // isLeaving để check xem tự thoát hay bị kích
         const els = { 
             home: document.getElementById("home"), game: document.getElementById("game"), board: document.getElementById("board"), 
             status: document.getElementById("statusText"), timer: document.getElementById("timerText"), pX: document.getElementById("pX"), pO: document.getElementById("pO"), 
             popup: document.getElementById("overlayPopup"), popupTitle: document.getElementById("popupTitle"), 
             popupBtns: document.getElementById("popupButtons"), rematchBarBox: document.getElementById("rematchProgressBox"), rematchBar: document.getElementById("rematchProgress"),
-            endControls: document.getElementById("endControls") 
+            endControls: document.getElementById("endControls"), roomDisplay: document.getElementById("roomIdDisplay")
         };
 
         window.onload = () => {
@@ -298,10 +316,11 @@
             els.home.classList.remove('active'); setTimeout(() => els.home.classList.add('hidden'), 600);
             els.game.classList.remove('hidden'); setTimeout(() => els.game.classList.add('active'), 100);
 
+            els.roomDisplay.textContent = `Phòng: ${roomId} (Chạm để sao chép)`;
+
             // Auto Clean Room cũ
             db.ref("rooms/"+roomId).transaction(r => {
                 const NOW = Date.now();
-                // 1. Reset phòng nếu quá cũ (30 phút không chơi)
                 if (r && r.turnTime && (NOW - r.turnTime > 30 * 60 * 1000)) {
                     r = { boardSize: size, board: Array(size*size).fill(""), players: {}, turn: "X", startTime: NOW, turnTime: NOW };
                 }
@@ -314,10 +333,10 @@
                 else if(r.players.X.id===uid) { myRole="X"; r.players.X.name=name; r.players.X.avatar=ava; }
                 else if(r.players.O.id===uid) { myRole="O"; r.players.O.name=name; r.players.O.avatar=ava; }
                 
-                // 2. LOGIC QUAN TRỌNG: Nếu phòng ĐỦ 2 NGƯỜI (Vừa có người mới vào) -> Reset Timer
+                // Reset timer nếu có người thứ 2 vào
                 if(r.players.X && r.players.O && (!r.gameStarted)) {
                     r.gameStarted = true;
-                    r.turnTime = NOW; // Reset đồng hồ để người chơi mới không bị thiệt
+                    r.turnTime = NOW; 
                 }
 
                 return r;
@@ -341,9 +360,13 @@
                     }
                 }
 
+                // CHECK KICK vs LEAVE
+                // Nếu mình không còn trong danh sách players và mình chưa bấm nút thoát (isLeaving = false)
                 if(r.players && !r.players[myRole]) {
-                    alert("🚫 BẠN ĐÃ BỊ KÍCH KHỎI PHÒNG!");
-                    location.reload();
+                    if(!isLeaving) {
+                        alert("🚫 BẠN ĐÃ BỊ KÍCH KHỎI PHÒNG!");
+                        location.reload();
+                    }
                     return;
                 }
 
@@ -379,7 +402,7 @@
         }
 
         // ==========================================
-        //  ⚡⚡⚡ LOGIC QUẢN LÝ PHÒNG (KICK/MỜI) ⚡⚡⚡
+        //  ⚡⚡⚡ LOGIC QUẢN LÝ PHÒNG ⚡⚡⚡
         // ==========================================
 
         window.showHostControls = (targetRole) => {
@@ -414,25 +437,24 @@
         };
 
         function handleKickRequest(kickData) {
-            // --- FIX 2: ƯU TIÊN KIỂM TRA TÍN HIỆU TỪ CHỐI TRƯỚC ---
+            // --- FIX TỪ CHỐI: CHỈ HIỆN CHO NGƯỜI GỬI (HOST) ---
             if (kickData && kickData.status === 'refused') {
-                showToast("⚠️ Đối thủ từ chối ra ngoài!", "error");
+                // Nếu mình KHÔNG PHẢI là mục tiêu, tức là mình là người mời -> Hiện thông báo
+                if (myRole !== kickData.target) {
+                    showToast("⚠️ Đối thủ từ chối ra ngoài!", "error");
+                    if(els.popupTitle.textContent.includes("ĐANG GỬI")) hidePopup();
+                }
                 
-                // Tự động xóa thông báo kick trên server sau 2s
-                // (Chỉ Host thực hiện xóa để tránh xung đột)
+                // Host xóa thông báo sau 2s
                 db.ref("rooms/"+roomId+"/players/"+myRole).once('value', snap => {
                     if(snap.val() && snap.val().isHost) {
                          setTimeout(() => db.ref("rooms/"+roomId+"/kick").remove(), 2000);
                     }
                 });
-
-                if(els.popupTitle.textContent.includes("ĐANG GỬI")) hidePopup();
                 return;
             }
 
-            // --- Sau đó mới lọc người nhận ---
             if(!kickData || kickData.target !== myRole) {
-                // Nếu popup đang hiện "BỊ MỜI RA" mà dữ liệu kick không còn (hoặc không phải cho mình) -> Tắt popup
                 if(els.popupTitle.textContent.includes("BỊ MỜI RA")) els.popup.classList.add('hidden');
                 return;
             }
@@ -455,24 +477,24 @@
 
         window.declineKick = () => {
             els.popup.classList.add('hidden');
-            // Gửi tín hiệu TỪ CHỐI lên server
-            db.ref("rooms/"+roomId+"/kick").update({ status: 'refused' });
+            // Gửi tín hiệu TỪ CHỐI kèm theo target là CHÍNH MÌNH (để code trên nhận diện)
+            db.ref("rooms/"+roomId+"/kick").update({ status: 'refused', target: myRole });
         };
 
         window.hidePopup = () => els.popup.classList.add('hidden');
         window.leaveRoom = () => {
+             isLeaving = true; // Đánh dấu là tự thoát
              db.ref("rooms/"+roomId+"/players/"+myRole).remove().then(() => location.reload());
         }
 
         // ==========================================
 
         function handleRematch(rematch) {
-            // Không can thiệp nếu đang dùng popup để Quản lý phòng
             if(!els.popup.classList.contains('hidden') && 
                (els.popupTitle.textContent.includes("QUẢN LÝ") || els.popupTitle.textContent.includes("MỜI RA") || els.popupTitle.textContent.includes("ĐANG GỬI"))) return;
 
-            // --- FIX 1: TẮT LUÔN POPUP KHI BẮT ĐẦU VÁN MỚI (rematch == null) ---
             if(!rematch) {
+                // --- FIX TREO POPUP: Luôn tắt nếu không có data rematch ---
                 els.popup.classList.add("hidden");
                 document.getElementById("btnRematch").textContent = "🔄 Ván Mới";
                 return;
@@ -540,7 +562,6 @@
 
         function updateStatus(r) {
             clearInterval(timerInt);
-            // 1. NẾU THIẾU NGƯỜI -> DỪNG ĐỒNG HỒ, KHÔNG XỬ THUA
             if(!r.players?.X || !r.players?.O) { 
                 els.status.textContent = "⏳ Đang đợi đối thủ..."; 
                 els.timer.textContent = "--:--";
@@ -548,7 +569,6 @@
                 return; 
             }
 
-            // 2. LOGIC BÌNH THƯỜNG
             if(r.winner) {
                 els.status.innerHTML = r.winner==="draw"?"HÒA!":`<span style='color:${r.winner==='X'?'#4facfe':'#f093fb'}'>${r.players[r.winner].name} THẮNG!</span>`;
                 els.endControls.classList.remove("hidden"); els.timer.textContent = "END";
@@ -569,23 +589,47 @@
                 const r = snap.val();
                 if(r && r.turn===myRole && !r.board[i] && !r.winner && r.players.X && r.players.O) {
                     r.board[i] = myRole;
+                    // --- FIX 5x5 LOGIC ---
                     if(checkWin(r.board, i, r.boardSize)) r.winner = myRole; else if(!r.board.includes("")) r.winner = "draw";
                     else { r.turn = myRole==="X"?"O":"X"; r.turnTime = firebase.database.ServerValue.TIMESTAMP; }
                     db.ref("rooms/"+roomId).update(r);
                 }
             });
         }
+
         function checkWin(b, i, size) {
-            const x=i%size, y=Math.floor(i/size), val=b[i]; const dirs = [[1,0], [0,1], [1,1], [1,-1]];
-            for(let [dx, dy] of dirs) { let c=1; for(let s=1; s<5; s++) if(b[(y+dy*s)*size+(x+dx*s)]===val) c++; else break; for(let s=1; s<5; s++) if(b[(y-dy*s)*size+(x-dx*s)]===val) c++; else break; if(c>=5) return true; } return false;
+            const x = i % size, y = Math.floor(i / size), val = b[i];
+            const dirs = [[1, 0], [0, 1], [1, 1], [1, -1]];
+            for (let [dx, dy] of dirs) {
+                let c = 1;
+                // Check forward
+                for (let s = 1; s < 5; s++) {
+                    const nx = x + dx * s, ny = y + dy * s;
+                    // --- BOUNDARY CHECK CHO 5x5 ---
+                    if (nx < 0 || nx >= size || ny < 0 || ny >= size) break;
+                    if (b[ny * size + nx] === val) c++; else break;
+                }
+                // Check backward
+                for (let s = 1; s < 5; s++) {
+                    const nx = x - dx * s, ny = y - dy * s;
+                    // --- BOUNDARY CHECK CHO 5x5 ---
+                    if (nx < 0 || nx >= size || ny < 0 || ny >= size) break;
+                    if (b[ny * size + nx] === val) c++; else break;
+                }
+                if (c >= 5) return true;
+            }
+            return false;
         }
 
         document.getElementById("btnRematch").onclick = () => {
             document.getElementById("btnRematch").textContent = "Đã gửi...";
             db.ref("rooms/"+roomId+"/rematch").set({from:myRole, status:'pending', time: firebase.database.ServerValue.TIMESTAMP});
         };
+        
+        // NÚT THOÁT (TỰ NGUYỆN)
         document.getElementById("btnLeave").onclick = () => { 
             if(confirm("Bạn chắc chắn muốn thoát?")) { 
+                isLeaving = true; // Set cờ tự thoát
                 db.ref("rooms/"+roomId+"/players/"+myRole).remove().then(() => location.reload()); 
             } 
         };
