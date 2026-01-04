@@ -13,7 +13,7 @@
 
     <style>
         :root {
-            --glass-bg: rgba(10, 15, 30, 0.85); /* Đậm hơn chút để dễ nhìn */
+            --glass-bg: rgba(10, 15, 30, 0.85);
             --glass-border: rgba(255, 255, 255, 0.15);
             --primary: #667eea; --accent: #f093fb; --gold: #ffd700; --text: #ffffff;
             --danger: #ff4757;
@@ -28,57 +28,36 @@
             z-index: 10; 
             display: flex; justify-content: center; align-items: center; 
             transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            pointer-events: none; /* Mặc định cho xuyên qua, các panel con sẽ auto */
+            pointer-events: none;
         }
-        
-        /* Trạng thái ẩn (Minimized) */
-        #ui-layer.minimized { 
-            opacity: 0; 
-            transform: scale(0.8) translateY(100px); 
-            pointer-events: none; 
-        }
+        #ui-layer.minimized { opacity: 0; transform: scale(0.8) translateY(100px); pointer-events: none; }
 
-        /* Nút Mở lại giao diện (Show UI) */
+        /* Nút Mở lại UI */
         #btnShowUI {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0);
             width: 60px; height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px; cursor: pointer; z-index: 20;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0;
+            font-size: 24px; cursor: pointer; z-index: 20; backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); opacity: 0; transition: 0.4s;
         }
         #ui-layer.minimized ~ #btnShowUI { transform: translateX(-50%) scale(1); opacity: 1; pointer-events: auto; }
-        #btnShowUI:active { transform: translateX(-50%) scale(0.9); }
 
-        /* Nút Tắt giao diện (Hide UI) */
+        /* Nút Tắt UI */
         .btn-close-ui {
-            position: absolute; top: 15px; right: 15px;
-            width: 35px; height: 35px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            border: none; color: rgba(255,255,255,0.7);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; cursor: pointer;
-            transition: 0.3s;
+            position: absolute; top: 15px; right: 15px; width: 35px; height: 35px;
+            background: rgba(255,255,255,0.1); border-radius: 50%; border: none; color: rgba(255,255,255,0.7);
+            display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: 0.3s;
         }
         .btn-close-ui:hover { background: rgba(255,255,255,0.2); color: #fff; transform: rotate(90deg); }
 
         /* Music Button */
         #music-control {
-            pointer-events: auto;
-            position: absolute; top: 20px; left: 20px; /* Chuyển sang trái để không kẹt nút tắt */
-            width: 40px; height: 40px;
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            pointer-events: auto; position: absolute; top: 20px; left: 20px;
+            width: 40px; height: 40px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 100; font-size: 18px;
-            box-shadow: 0 0 15px rgba(102, 126, 234, 0.2);
-            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;
+            font-size: 18px; box-shadow: 0 0 15px rgba(102, 126, 234, 0.2); transition: 0.3s;
         }
         #music-control.playing { border-color: var(--primary); box-shadow: 0 0 20px var(--primary); animation: pulseMusic 2s infinite; }
         @keyframes pulseMusic { 0%,100%{box-shadow:0 0 10px var(--primary)} 50%{box-shadow:0 0 25px var(--primary)} }
@@ -86,14 +65,10 @@
         /* Game Panel */
         .game-panel { 
             pointer-events: auto; width: 90%; max-width: 420px; 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(25px) saturate(200%); -webkit-backdrop-filter: blur(25px) saturate(200%);
-            border: 1px solid var(--glass-border); border-top: 1px solid rgba(255,255,255,0.3); 
-            border-radius: 30px; padding: 30px 25px; 
-            box-shadow: 0 40px 80px rgba(0,0,0,0.6); 
-            opacity: 0; transform: translateY(50px); 
-            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-            position: relative; 
+            background: var(--glass-bg); backdrop-filter: blur(25px) saturate(200%); -webkit-backdrop-filter: blur(25px) saturate(200%);
+            border: 1px solid var(--glass-border); border-top: 1px solid rgba(255,255,255,0.3); border-radius: 30px; 
+            padding: 30px 25px; box-shadow: 0 40px 80px rgba(0,0,0,0.6); 
+            opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); position: relative; 
         }
         .game-panel.active { opacity: 1; transform: translateY(0); }
         
@@ -105,17 +80,16 @@
         button:active { transform: scale(0.97); }
         .btn-red { background: rgba(255, 50, 50, 0.1); border: 1px solid rgba(255, 50, 50, 0.3); color: #ff8080; box-shadow: none; font-size: 13px; padding: 12px; margin-top: 10px; }
         
-        /* Board & Cells */
+        /* Board */
         #board-container { width: 100%; aspect-ratio: 1/1; margin: 20px auto; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); padding: 4px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
         #board { display: grid; width: 100%; height: 100%; gap: 1px; }
         .cell { background: rgba(255,255,255,0.04); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; transition: background 0.2s; }
         .cell:active { background: rgba(255,255,255,0.1); }
         .cell.X { color: #4facfe; text-shadow: 0 0 12px #4facfe; }
         .cell.O { color: #f093fb; text-shadow: 0 0 12px #f093fb; }
-        
         #status-bar { display: flex; justify-content: space-between; font-weight: 600; font-size: 15px; margin-top: 15px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; }
         
-        /* Rematch Overlay */
+        /* Rematch */
         #rematchOverlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 50; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
@@ -147,7 +121,7 @@
                 <option value="10">⚡ 10x10 (Siêu Tốc)</option>
                 <option value="5">🔥 5x5 (Tử Chiến)</option>
             </select>
-            <input id="inpRoom" placeholder="Mã Phòng (6 số)" type="tel" maxlength="6" autocomplete="off">
+            <input id="inpRoom" placeholder="Mã Phòng (5-30 số)" type="tel" maxlength="30" autocomplete="off">
             <button id="btnJoin">🚀 VÀO CHIẾN NGAY</button>
             <button class="btn-red" id="btnClear">Xóa dữ liệu cũ</button>
         </div>
@@ -196,6 +170,7 @@
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
+        // --- SHADER (Twinkle) ---
         const nodeShader = {
             vertexShader: `attribute float size; attribute vec3 color; varying vec3 vColor; uniform float uTime; void main() { vColor = color; vec3 pos = position; pos *= 1.0 + 0.05 * sin(uTime * 0.5 + position.x); vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_PointSize = size * (300.0 / -mvPosition.z); gl_Position = projectionMatrix * mvPosition; }`,
             fragmentShader: `varying vec3 vColor; uniform float uTime; void main() { vec2 center = 2.0 * gl_PointCoord - 1.0; float dist = length(center); if (dist > 1.0) discard; float glow = 1.0 - dist; glow = pow(glow, 1.5); float twinkle = 0.6 + 0.4 * sin(uTime * 3.0 + vColor.x * 20.0 + vColor.y * 10.0); gl_FragColor = vec4(vColor, glow * twinkle); }`
@@ -211,6 +186,7 @@
         composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.6, 0.5, 0.8));
         composer.addPass(new OutputPass());
 
+        // Background Stars
         function createStars() {
             const geo = new THREE.BufferGeometry(); const pos = [];
             for(let i=0; i<5000; i++) pos.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000));
@@ -219,9 +195,9 @@
         }
         createStars();
 
+        // Neural Network
         const pGroup = new THREE.Group();
-        const posP=[], colP=[], sizeP=[], posConn=[];
-        const nodes=[], palette=[new THREE.Color('#667eea'), new THREE.Color('#764ba2'), new THREE.Color('#f093fb'), new THREE.Color('#4facfe')];
+        const posP=[], colP=[], sizeP=[], posConn=[], nodes=[], palette=[new THREE.Color('#667eea'), new THREE.Color('#764ba2'), new THREE.Color('#f093fb'), new THREE.Color('#4facfe')];
         for(let i=0; i<250; i++) {
             const r=30*Math.cbrt(Math.random()), theta=Math.random()*Math.PI*2, phi=Math.acos(2*Math.random()-1);
             const x=r*Math.sin(phi)*Math.cos(theta), y=r*Math.sin(phi)*Math.sin(theta), z=r*Math.cos(phi);
@@ -239,15 +215,38 @@
         pGroup.add(new THREE.Points(geoP, matP));
         scene.add(pGroup);
 
-        const sat = new THREE.Mesh(new THREE.SphereGeometry(1.5,16,16), new THREE.MeshBasicMaterial({color:0x4facfe})); scene.add(sat);
-        const ufo = new THREE.Mesh(new THREE.SphereGeometry(3,32,8).scale(1,0.3,1), new THREE.MeshBasicMaterial({color:0xf093fb})); ufo.position.set(-200,40,-100); scene.add(ufo);
+        // --- NEW: SATELLITE & UFO (IMAGE SPRITES) ---
+        const textureLoader = new THREE.TextureLoader();
+
+        // Satellite Sprite
+        const satMap = textureLoader.load('https://i.postimg.cc/13bfGhtB/pngtree-satellite-isolated-on-transparent-background-png-image-16786689-removebg-preview.png');
+        const satMat = new THREE.SpriteMaterial({ map: satMap, transparent: true });
+        const satellite = new THREE.Sprite(satMat);
+        satellite.scale.set(12, 12, 1); // Kích thước ảnh vệ tinh
+        scene.add(satellite);
+
+        // UFO Sprite
+        const ufoMap = textureLoader.load('https://i.postimg.cc/vTG14rBZ/cute-alien-riding-ufo-space-cartoon-vector-icon-illustration-science-technology-icon-isolated-138676.png');
+        const ufoMat = new THREE.SpriteMaterial({ map: ufoMap, transparent: true });
+        const ufo = new THREE.Sprite(ufoMat);
+        ufo.scale.set(15, 15, 1); // Kích thước ảnh UFO
+        ufo.position.set(-200, 40, -100);
+        scene.add(ufo);
 
         const clock = new THREE.Clock(); let intro=false;
         function animate() {
             requestAnimationFrame(animate); const t=clock.getElapsedTime();
             pGroup.rotation.y=t*0.05; matP.uniforms.uTime.value=t;
-            sat.position.set(Math.cos(t*0.8)*60, Math.sin(t*0.4)*20, Math.sin(t*0.8)*60);
-            ufo.position.x+=0.5; if(ufo.position.x>200) ufo.position.x=-200; ufo.rotation.z=t*0.5;
+            
+            // Satellite Orbit
+            satellite.position.set(Math.cos(t*0.8)*60, Math.sin(t*0.4)*20, Math.sin(t*0.8)*60);
+            
+            // UFO Flyby
+            ufo.position.x += 0.5; 
+            if(ufo.position.x > 200) ufo.position.x = -200;
+            // Với Sprite, rotation là 2D rotation (nghiêng ảnh)
+            ufo.material.rotation = Math.sin(t * 2) * 0.1; // Nghiêng lắc lư nhẹ khi bay
+
             if(!intro) { camera.position.z = THREE.MathUtils.lerp(camera.position.z, 60, 0.02); if(camera.position.z<65) { intro=true; document.getElementById('home').classList.add('active'); } }
             composer.render();
         }
@@ -256,7 +255,7 @@
     </script>
 
     <script>
-        // --- 1. UI CONTROL (X & MỞ) ---
+        // --- 1. UI CONTROL ---
         const uiLayer = document.getElementById('ui-layer');
         window.hideUI = () => uiLayer.classList.add('minimized');
         window.showUI = () => uiLayer.classList.remove('minimized');
@@ -294,9 +293,12 @@
         document.getElementById("btnJoin").onclick = () => {
             const name = document.getElementById("inpName").value.trim(); const ava = document.getElementById("inpAvatar").value.trim(); 
             roomId = document.getElementById("inpRoom").value.trim(); const size = parseInt(document.getElementById("inpSize").value);
-            if(!name || roomId.length !== 6) return alert("⚠️ Nhập đủ Tên & Mã phòng!");
+            
+            // --- VALIDATE ID: 5-30 KÝ TỰ ---
+            if(!name || roomId.length < 5 || roomId.length > 30) return alert("⚠️ Tên phải có và Mã phòng từ 5-30 số!");
+            
             localStorage.uName=name; localStorage.uAva=ava;
-            if(!isMusicPlaying) musicBtn.click(); // Auto play music
+            if(!isMusicPlaying) musicBtn.click(); // Auto play
             els.home.classList.remove('active'); setTimeout(() => els.home.classList.add('hidden'), 600);
             els.game.classList.remove('hidden'); setTimeout(() => els.game.classList.add('active'), 100);
             db.ref("rooms/"+roomId).transaction(r => {
@@ -365,7 +367,7 @@
             for(let [dx, dy] of dirs) { let c=1; for(let s=1; s<5; s++) if(b[(y+dy*s)*size+(x+dx*s)]===val) c++; else break; for(let s=1; s<5; s++) if(b[(y-dy*s)*size+(x-dx*s)]===val) c++; else break; if(c>=5) return true; } return false;
         }
 
-        // --- REMATCH LOGIC (NÂNG CẤP) ---
+        // --- REMATCH LOGIC ---
         document.getElementById("btnRematch").onclick = () => {
             document.getElementById("btnRematch").textContent = "Đã gửi...";
             db.ref("rooms/"+roomId+"/rematch").set({from:myRole, status:'pending', time: firebase.database.ServerValue.TIMESTAMP});
@@ -378,7 +380,7 @@
                 return;
             }
             const now = Date.now();
-            if(now - rematch.time > 5000) { // Hết hạn 5s
+            if(now - rematch.time > 5000) { 
                 if(rematch.from === myRole) db.ref("rooms/"+roomId+"/rematch").remove();
                 return;
             }
@@ -388,21 +390,18 @@
             bar.style.transition = 'none'; bar.style.width = '100%';
             setTimeout(() => { bar.style.transition = `width linear ${5000 - (now - rematch.time)}ms`; bar.style.width = '0%'; }, 50);
 
-            // LOGIC HIỂN THỊ TRẠNG THÁI
+            // LOGIC PENDING / DECLINED
             if(rematch.status === 'pending') {
                 if(rematch.from !== myRole) {
-                    // Mình là người nhận -> Hiện nút đồng ý/từ chối
                     els.rematchTitle.textContent = "🔥 ĐỐI THỦ THÁCH ĐẤU!";
                     els.rematchTitle.style.color = "var(--gold)";
                     els.rematchButtons.classList.remove("hidden");
                 } else {
-                    // Mình là người gửi -> Hiện đang chờ
                     els.rematchTitle.textContent = "⏳ Đang chờ phản hồi...";
                     els.rematchTitle.style.color = "#fff";
                     els.rematchButtons.classList.add("hidden");
                 }
             } else if(rematch.status === 'declined') {
-                // Ai đó đã từ chối
                 els.rematchTitle.textContent = "❌ ĐỐI THỦ ĐÃ TỪ CHỐI!";
                 els.rematchTitle.style.color = "var(--danger)";
                 els.rematchButtons.classList.add("hidden");
@@ -423,7 +422,6 @@
         };
 
         document.getElementById("btnDecline").onclick = () => {
-            // Cập nhật trạng thái 'declined' lên server để bên kia biết
             db.ref("rooms/"+roomId+"/rematch").update({status: 'declined', time: firebase.database.ServerValue.TIMESTAMP});
         };
 
