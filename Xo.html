@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Caro Quantum Space VIP</title>
+    <title>Caro Quantum - Kick Feature</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
         }
         #ui-layer.minimized { opacity: 0; transform: scale(0.8) translateY(100px); pointer-events: none; }
 
-        /* Nút Mở lại UI */
+        /* Buttons */
         #btnShowUI {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0);
             width: 60px; height: 60px;
@@ -42,8 +42,7 @@
             box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); opacity: 0; transition: 0.4s;
         }
         #ui-layer.minimized ~ #btnShowUI { transform: translateX(-50%) scale(1); opacity: 1; pointer-events: auto; }
-
-        /* Nút Tắt UI */
+        
         .btn-close-ui {
             position: absolute; top: 15px; right: 15px; width: 35px; height: 35px;
             background: rgba(255,255,255,0.1); border-radius: 50%; border: none; color: rgba(255,255,255,0.7);
@@ -51,7 +50,6 @@
         }
         .btn-close-ui:hover { background: rgba(255,255,255,0.2); color: #fff; transform: rotate(90deg); }
 
-        /* Music Button */
         #music-control {
             pointer-events: auto; position: absolute; top: 20px; left: 20px;
             width: 40px; height: 40px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
@@ -89,14 +87,26 @@
         .cell.O { color: #f093fb; text-shadow: 0 0 12px #f093fb; }
         #status-bar { display: flex; justify-content: space-between; font-weight: 600; font-size: 15px; margin-top: 15px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; }
         
-        /* Rematch */
-        #rematchOverlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 50; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); animation: fadeIn 0.3s ease; }
+        /* Modal Overlay (Dùng chung cho Rematch và Kick) */
+        .overlay-popup { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 50; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(10px); animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
-
         .hidden { display: none !important; }
+        
         .avatar-box { width: 60px; height: 60px; margin: 0 auto 5px; position: relative; }
         .avatar-box img.main { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.2); }
         .avatar-box img.frame { position: absolute; top: -16%; left: -16%; width: 132%; height: 132%; pointer-events: none; }
+        
+        /* Kick Button */
+        .btn-kick-user {
+            position: absolute; top: -10px; right: -10px; width: 24px; height: 24px;
+            background: var(--danger); border-radius: 50%; border: 2px solid #fff;
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; cursor: pointer; box-shadow: 0 0 10px var(--danger); z-index: 5;
+            transition: 0.3s;
+        }
+        .btn-kick-user:active { transform: scale(0.9); }
+        .btn-kick-active { width: auto; padding: 0 10px; border-radius: 12px; font-weight: bold; right: -20px; animation: pulseRed 1s infinite; }
+        @keyframes pulseRed { 0%{box-shadow:0 0 0 0 rgba(255, 71, 87, 0.7)} 70%{box-shadow:0 0 0 10px rgba(255, 71, 87, 0)} 100%{box-shadow:0 0 0 0 rgba(255, 71, 87, 0)} }
     </style>
 </head>
 <body>
@@ -105,6 +115,8 @@
 
     <audio id="bgMusic" loop><source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=space-chillout-14194.mp3" type="audio/mpeg"></audio>
     <div id="music-control">🔇</div>
+
+    <div id="toastMsg" style="position:absolute; top:80px; left:50%; transform:translateX(-50%); background:rgba(0,255,100,0.2); border:1px solid #0f0; padding:10px 20px; border-radius:20px; color:#fff; display:none; z-index:100; backdrop-filter:blur(5px); font-size:14px; text-align:center;"></div>
 
     <div id="ui-layer">
         
@@ -129,22 +141,23 @@
         <div id="game" class="game-panel hidden">
             <button class="btn-close-ui" onclick="hideUI()">✕</button>
             
-            <div id="rematchOverlay" class="hidden">
-                <h3 id="rematchTitle" style="color:var(--gold); margin-bottom:15px; text-align:center">🔥 THÁCH ĐẤU LẠI?</h3>
-                <div style="width:80%; height:4px; background:#333; margin-bottom:20px; border-radius:2px; overflow:hidden">
+            <div id="overlayPopup" class="overlay-popup hidden">
+                <h3 id="popupTitle" style="color:var(--gold); margin-bottom:15px; text-align:center; padding:0 10px;">THÔNG BÁO</h3>
+                
+                <div id="rematchProgressBox" style="width:80%; height:4px; background:#333; margin-bottom:20px; border-radius:2px; overflow:hidden;" class="hidden">
                     <div id="rematchProgress" style="width:0%; height:100%; background:var(--gold)"></div>
                 </div>
-                <div id="rematchButtons" style="display:flex; gap:15px; width:100%">
-                    <button id="btnAccept" style="margin:0; background:var(--primary)">CHIẾN!</button>
-                    <button id="btnDecline" style="margin:0; background:#444">THÔI</button>
-                </div>
+
+                <div id="popupButtons" style="display:flex; gap:15px; width:100%; justify-content:center;">
+                    </div>
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
-                <div id="pX" style="text-align:center; width:35%"></div>
+                <div id="pX" style="text-align:center; width:35%; position:relative;"></div>
                 <div style="font-size:24px; color:rgba(255,255,255,0.1); font-weight:900">VS</div>
-                <div id="pO" style="text-align:center; width:35%"></div>
+                <div id="pO" style="text-align:center; width:35%; position:relative;"></div>
             </div>
+
             <div id="board-container"><div id="board"></div></div>
             <div id="status-bar">
                 <span id="statusText">Đang kết nối...</span>
@@ -170,7 +183,6 @@
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-        // --- SHADER (Twinkle) ---
         const nodeShader = {
             vertexShader: `attribute float size; attribute vec3 color; varying vec3 vColor; uniform float uTime; void main() { vColor = color; vec3 pos = position; pos *= 1.0 + 0.05 * sin(uTime * 0.5 + position.x); vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0); gl_PointSize = size * (300.0 / -mvPosition.z); gl_Position = projectionMatrix * mvPosition; }`,
             fragmentShader: `varying vec3 vColor; uniform float uTime; void main() { vec2 center = 2.0 * gl_PointCoord - 1.0; float dist = length(center); if (dist > 1.0) discard; float glow = 1.0 - dist; glow = pow(glow, 1.5); float twinkle = 0.6 + 0.4 * sin(uTime * 3.0 + vColor.x * 20.0 + vColor.y * 10.0); gl_FragColor = vec4(vColor, glow * twinkle); }`
@@ -186,7 +198,6 @@
         composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.6, 0.5, 0.8));
         composer.addPass(new OutputPass());
 
-        // Background Stars
         function createStars() {
             const geo = new THREE.BufferGeometry(); const pos = [];
             for(let i=0; i<5000; i++) pos.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000));
@@ -195,7 +206,6 @@
         }
         createStars();
 
-        // Neural Network
         const pGroup = new THREE.Group();
         const posP=[], colP=[], sizeP=[], posConn=[], nodes=[], palette=[new THREE.Color('#667eea'), new THREE.Color('#764ba2'), new THREE.Color('#f093fb'), new THREE.Color('#4facfe')];
         for(let i=0; i<250; i++) {
@@ -209,44 +219,24 @@
         pGroup.add(new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(posConn,3)), new THREE.LineBasicMaterial({color:0x667eea, transparent:true, opacity:0.15})));
         const matP = new THREE.ShaderMaterial({uniforms:{uTime:{value:0}}, vertexShader:nodeShader.vertexShader, fragmentShader:nodeShader.fragmentShader, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending});
         const geoP = new THREE.BufferGeometry();
-        geoP.setAttribute('position', new THREE.Float32BufferAttribute(posP,3));
-        geoP.setAttribute('color', new THREE.Float32BufferAttribute(colP,3));
-        geoP.setAttribute('size', new THREE.Float32BufferAttribute(sizeP,1));
-        pGroup.add(new THREE.Points(geoP, matP));
-        scene.add(pGroup);
+        geoP.setAttribute('position', new THREE.Float32BufferAttribute(posP,3)); geoP.setAttribute('color', new THREE.Float32BufferAttribute(colP,3)); geoP.setAttribute('size', new THREE.Float32BufferAttribute(sizeP,1));
+        pGroup.add(new THREE.Points(geoP, matP)); scene.add(pGroup);
 
-        // --- NEW: SATELLITE & UFO (IMAGE SPRITES) ---
         const textureLoader = new THREE.TextureLoader();
-
-        // Satellite Sprite
         const satMap = textureLoader.load('https://i.postimg.cc/13bfGhtB/pngtree-satellite-isolated-on-transparent-background-png-image-16786689-removebg-preview.png');
         const satMat = new THREE.SpriteMaterial({ map: satMap, transparent: true });
-        const satellite = new THREE.Sprite(satMat);
-        satellite.scale.set(12, 12, 1); // Kích thước ảnh vệ tinh
-        scene.add(satellite);
+        const satellite = new THREE.Sprite(satMat); satellite.scale.set(12, 12, 1); scene.add(satellite);
 
-        // UFO Sprite
         const ufoMap = textureLoader.load('https://i.postimg.cc/vTG14rBZ/cute-alien-riding-ufo-space-cartoon-vector-icon-illustration-science-technology-icon-isolated-138676.png');
         const ufoMat = new THREE.SpriteMaterial({ map: ufoMap, transparent: true });
-        const ufo = new THREE.Sprite(ufoMat);
-        ufo.scale.set(15, 15, 1); // Kích thước ảnh UFO
-        ufo.position.set(-200, 40, -100);
-        scene.add(ufo);
+        const ufo = new THREE.Sprite(ufoMat); ufo.scale.set(15, 15, 1); ufo.position.set(-200, 40, -100); scene.add(ufo);
 
         const clock = new THREE.Clock(); let intro=false;
         function animate() {
             requestAnimationFrame(animate); const t=clock.getElapsedTime();
             pGroup.rotation.y=t*0.05; matP.uniforms.uTime.value=t;
-            
-            // Satellite Orbit
             satellite.position.set(Math.cos(t*0.8)*60, Math.sin(t*0.4)*20, Math.sin(t*0.8)*60);
-            
-            // UFO Flyby
-            ufo.position.x += 0.5; 
-            if(ufo.position.x > 200) ufo.position.x = -200;
-            // Với Sprite, rotation là 2D rotation (nghiêng ảnh)
-            ufo.material.rotation = Math.sin(t * 2) * 0.1; // Nghiêng lắc lư nhẹ khi bay
-
+            ufo.position.x += 0.5; if(ufo.position.x > 200) ufo.position.x = -200; ufo.material.rotation = Math.sin(t * 2) * 0.1;
             if(!intro) { camera.position.z = THREE.MathUtils.lerp(camera.position.z, 60, 0.02); if(camera.position.z<65) { intro=true; document.getElementById('home').classList.add('active'); } }
             composer.render();
         }
@@ -255,12 +245,17 @@
     </script>
 
     <script>
-        // --- 1. UI CONTROL ---
+        // --- UI UTILS ---
         const uiLayer = document.getElementById('ui-layer');
         window.hideUI = () => uiLayer.classList.add('minimized');
         window.showUI = () => uiLayer.classList.remove('minimized');
+        
+        function showToast(msg, type='info') {
+            const t = document.getElementById("toastMsg");
+            t.textContent = msg; t.style.display='block'; t.style.borderColor = type==='error'?'#ff4757':'#0f0'; t.style.background = type==='error'?'rgba(255,71,87,0.2)':'rgba(0,255,100,0.2)';
+            setTimeout(()=>t.style.display='none', 3000);
+        }
 
-        // --- 2. MUSIC CONTROL ---
         const bgMusic = document.getElementById('bgMusic');
         const musicBtn = document.getElementById('music-control');
         let isMusicPlaying = false;
@@ -270,16 +265,17 @@
             isMusicPlaying = !isMusicPlaying;
         });
 
-        // --- 3. GAME LOGIC ---
+        // --- GAME LOGIC ---
         const db = firebase.initializeApp({ apiKey: "AIzaSyBdKC3vCBjHhsakrE1hUYg-2_Vi9JYX3vk", databaseURL: "https://noitu-7dca6-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "noitu-7dca6" }).database();
         const FRAME_GIF = "https://i.postimg.cc/FFqqqbzz/khung-vip-303.gif";
+        
         let roomId="", myRole="", uid=localStorage.uid||(localStorage.uid=Math.random().toString(36).substr(2,9)); 
-        let timerInt=null, rematchTimeout=null;
+        let timerInt=null, rematchTimeout=null, kickTimerInterval=null;
         const els = { 
             home: document.getElementById("home"), game: document.getElementById("game"), board: document.getElementById("board"), 
             status: document.getElementById("statusText"), timer: document.getElementById("timerText"), pX: document.getElementById("pX"), pO: document.getElementById("pO"), 
-            rematchOverlay: document.getElementById("rematchOverlay"), rematchProgress: document.getElementById("rematchProgress"), 
-            rematchTitle: document.getElementById("rematchTitle"), rematchButtons: document.getElementById("rematchButtons"),
+            popup: document.getElementById("overlayPopup"), popupTitle: document.getElementById("popupTitle"), 
+            popupBtns: document.getElementById("popupButtons"), rematchBarBox: document.getElementById("rematchProgressBox"), rematchBar: document.getElementById("rematchProgress"),
             endControls: document.getElementById("endControls") 
         };
 
@@ -290,41 +286,233 @@
         document.getElementById("inpAvatar").oninput = (e) => { const v=e.target.value.trim(); if(v){document.getElementById("previewImg").src=v;document.getElementById("previewArea").classList.remove('hidden');} };
         document.getElementById("btnClear").onclick = () => { localStorage.clear(); location.reload(); };
 
+        // === JOIN ROOM & HANDLE HOST ===
         document.getElementById("btnJoin").onclick = () => {
             const name = document.getElementById("inpName").value.trim(); const ava = document.getElementById("inpAvatar").value.trim(); 
             roomId = document.getElementById("inpRoom").value.trim(); const size = parseInt(document.getElementById("inpSize").value);
-            
-            // --- VALIDATE ID: 5-30 KÝ TỰ ---
-            if(!name || roomId.length < 5 || roomId.length > 30) return alert("⚠️ Tên phải có và Mã phòng từ 5-30 số!");
+            if(!name || roomId.length < 5 || roomId.length > 30) return alert("⚠️ Tên & Mã phòng (5-30 số)!");
             
             localStorage.uName=name; localStorage.uAva=ava;
-            if(!isMusicPlaying) musicBtn.click(); // Auto play
+            if(!isMusicPlaying) musicBtn.click();
             els.home.classList.remove('active'); setTimeout(() => els.home.classList.add('hidden'), 600);
             els.game.classList.remove('hidden'); setTimeout(() => els.game.classList.add('active'), 100);
+
             db.ref("rooms/"+roomId).transaction(r => {
                 if(!r) r = { boardSize: size, board: Array(size*size).fill(""), players:{}, turn:"X", startTime: Date.now(), turnTime: Date.now() };
-                if(r.players.X && r.players.X.id===uid) { myRole="X"; r.players.X.name=name; r.players.X.avatar=ava; }
-                else if(r.players.O && r.players.O.id===uid) { myRole="O"; r.players.O.name=name; r.players.O.avatar=ava; }
-                else if(!r.players.X) { r.players.X={name,ava,id:uid}; myRole="X"; }
-                else if(!r.players.O) { r.players.O={name,ava,id:uid}; myRole="O"; }
+                
+                // Logic Host: Ai có isHost=true là chủ. Mặc định X vào trước là Host.
+                let p = { name, ava, id: uid, isHost: false };
+                
+                if(!r.players.X) { p.isHost = true; myRole="X"; r.players.X = p; } 
+                else if(!r.players.O) { p.isHost = false; myRole="O"; r.players.O = p; }
+                else if(r.players.X.id===uid) { myRole="X"; r.players.X.name=name; r.players.X.avatar=ava; }
+                else if(r.players.O.id===uid) { myRole="O"; r.players.O.name=name; r.players.O.avatar=ava; }
+                
                 return r;
+            }, (error, committed) => {
+                if(committed) {
+                    db.ref("rooms/" + roomId + "/players/" + myRole).onDisconnect().remove();
+                    listenRoom();
+                }
             });
-            listenRoom();
         };
 
         function listenRoom() {
             db.ref("rooms/"+roomId).on("value", snap => {
                 const r = snap.val(); if(!r) return;
+                
+                // Host Migration: Nếu Host cũ thoát, gán Host cho người còn lại
+                if(r.players && (!r.players.X || !r.players.O)) {
+                    // Nếu tôi đang ở trong phòng và tôi chưa phải host, nhưng đối phương biến mất -> Tôi thành Host
+                    const oppRole = myRole==="X"?"O":"X";
+                    if(r.players[myRole] && !r.players[myRole].isHost && !r.players[oppRole]) {
+                        db.ref("rooms/"+roomId+"/players/"+myRole).update({isHost: true});
+                    }
+                }
+
+                // Kiểm tra xem mình có bị Kick không
+                if(r.players && !r.players[myRole]) {
+                    // Nếu đang chơi mà bị xóa khỏi danh sách players -> Bị Kick hoặc lỗi
+                    alert("🚫 BẠN ĐÃ BỊ MỜI RA KHỎI PHÒNG!");
+                    location.reload();
+                    return;
+                }
+
                 renderPlayers(r.players); renderBoard(r.board, r.boardSize, r.winner); updateStatus(r); 
                 handleRematch(r.rematch);
+                handleKickRequest(r.kick);
             });
         }
 
+        // --- RENDER PLAYERS & KICK BUTTON ---
         function renderPlayers(p) {
-            const tmpl = (u, role) => `<div class="avatar-box"><img class="main" src="${u?.avatar||'https://via.placeholder.com/60?text=?'}"><img class="frame" src="${FRAME_GIF}"></div><div style="font-size:13px; font-weight:700; color:${role==='X'?'#4facfe':'#f093fb'}; text-shadow:0 0 10px rgba(0,0,0,0.5)">${u?.name||'Đợi...'}</div>`;
-            els.pX.innerHTML = tmpl(p?.X, 'X'); els.pO.innerHTML = tmpl(p?.O, 'O');
+            const tmpl = (u, role) => {
+                if(!u) return `<div style="font-size:12px; color:#aaa; margin-top:20px;">Đang đợi...</div>`;
+                
+                // Logic hiển thị nút KICK
+                let kickBtnHTML = "";
+                const isMeHost = p[myRole] && p[myRole].isHost;
+                // Chỉ hiện nút kick nếu: Tôi là Host, Đây là ô của Đối thủ, và Đối thủ đang tồn tại
+                if(isMeHost && role !== myRole) {
+                    kickBtnHTML = `<div class="btn-kick-user" id="btnKick${role}" onclick="startKickProcess('${role}')">⛔</div>`;
+                }
+
+                return `
+                    <div class="avatar-box">
+                        <img class="main" src="${u.avatar||'https://via.placeholder.com/60?text=?'}">
+                        <img class="frame" src="${FRAME_GIF}">
+                        ${kickBtnHTML}
+                    </div>
+                    <div style="font-size:13px; font-weight:700; color:${role==='X'?'#4facfe':'#f093fb'}; text-shadow:0 0 10px rgba(0,0,0,0.5)">
+                        ${u.isHost ? '👑 ' : ''}${u.name}
+                    </div>`;
+            };
+            
+            els.pX.innerHTML = tmpl(p?.X, 'X'); 
+            els.pO.innerHTML = tmpl(p?.O, 'O');
+        }
+        
+        // --- KICK LOGIC (HOST SIDE) ---
+        window.startKickProcess = (targetRole) => {
+            const btn = document.getElementById(`btnKick${targetRole}`);
+            
+            // Nếu đang đếm ngược thì không làm gì (chờ hết giờ thành nút Đuổi)
+            if(btn.dataset.state === 'counting') return;
+
+            // Nếu trạng thái là 'kick_ready' (đã hết 15s) -> Thực hiện KICK
+            if(btn.dataset.state === 'kick_ready') {
+                if(confirm("Xác nhận đuổi người chơi này?")) {
+                    db.ref("rooms/"+roomId+"/kick").set({target: targetRole, type: 'force'}); // Đánh dấu là force kick
+                    // Xóa luôn player
+                    setTimeout(() => db.ref("rooms/"+roomId+"/players/"+targetRole).remove(), 500);
+                    // Reset giao diện
+                    db.ref("rooms/"+roomId+"/kick").remove();
+                    showToast("Đã đuổi người chơi!", "info");
+                }
+                return;
+            }
+
+            // Mặc định: Gửi yêu cầu mời ra (Soft Kick)
+            if(confirm("Mời người chơi này ra khỏi phòng? (Họ sẽ có 15s để tự out, nếu không bạn có quyền kích thẳng)")) {
+                // Gửi lên DB
+                db.ref("rooms/"+roomId+"/kick").set({ target: targetRole, type: 'invite', time: Date.now() });
+                
+                // UI Đếm ngược trên máy Host
+                btn.dataset.state = 'counting';
+                let count = 15;
+                btn.classList.add('btn-kick-active');
+                btn.textContent = count;
+                
+                // Xóa interval cũ nếu có
+                if(kickTimerInterval) clearInterval(kickTimerInterval);
+                
+                kickTimerInterval = setInterval(() => {
+                    count--;
+                    btn.textContent = count;
+                    if(count <= 0) {
+                        clearInterval(kickTimerInterval);
+                        btn.textContent = "☠️ ĐUỔI";
+                        btn.dataset.state = 'kick_ready'; // Chuyển trạng thái sang sẵn sàng kích
+                        btn.style.background = "#ff0000";
+                    }
+                }, 1000);
+            }
+        };
+
+        // --- KICK LOGIC (VICTIM SIDE) ---
+        function handleKickRequest(kickData) {
+            // Nếu không có yêu cầu hoặc yêu cầu không dành cho mình -> Ẩn popup kick (nếu có)
+            if(!kickData || kickData.target !== myRole) {
+                // Đảm bảo không tắt nhầm popup Rematch
+                if(els.popupTitle.textContent.includes("BỊ MỜI RA")) els.popup.classList.add('hidden');
+                return;
+            }
+
+            // Nếu là loại "invite" -> Hiện thông báo mời
+            if(kickData.type === 'invite') {
+                els.popup.classList.remove('hidden');
+                els.popupTitle.textContent = "🚫 BẠN BỊ MỜI RA!";
+                els.popupTitle.style.color = "var(--danger)";
+                els.rematchBarBox.classList.add('hidden'); // Ẩn thanh loading của rematch
+                
+                els.popupBtns.innerHTML = `
+                    <div style="text-align:center; color:#ddd; margin-bottom:15px; font-size:14px;">Chủ phòng muốn bạn rời đi.</div>
+                    <button onclick="leaveRoom()" style="background:var(--danger); width:auto; padding:10px 30px;">🚪 Rời Ngay</button>
+                    <button onclick="hidePopup()" style="background:#444; width:auto; padding:10px 20px;">Lờ đi</button>
+                `;
+            }
+            // Nếu type là 'force' thì logic listenRoom ở trên đã xử lý (check player null -> reload)
         }
 
+        window.hidePopup = () => els.popup.classList.add('hidden');
+        window.leaveRoom = () => {
+             db.ref("rooms/"+roomId+"/players/"+myRole).remove().then(() => location.reload());
+        }
+
+
+        // --- REMATCH LOGIC (Giữ nguyên, chỉ sửa UI để dùng chung Popup) ---
+        function handleRematch(rematch) {
+            // Ưu tiên hiển thị Kick popup hơn Rematch
+            if(!els.popup.classList.contains('hidden') && els.popupTitle.textContent.includes("BỊ MỜI RA")) return;
+
+            if(!rematch) {
+                if(els.popupTitle.textContent.includes("THÁCH ĐẤU")) els.popup.classList.add("hidden");
+                document.getElementById("btnRematch").textContent = "🔄 Ván Mới";
+                return;
+            }
+            
+            const now = Date.now();
+            if(now - rematch.time > 5000) { 
+                if(rematch.from === myRole) db.ref("rooms/"+roomId+"/rematch").remove();
+                return;
+            }
+
+            if(rematch.status === 'declined') {
+                if(rematch.from === myRole) {
+                    els.popup.classList.remove("hidden");
+                    els.popupTitle.textContent = "❌ ĐỐI THỦ TỪ CHỐI";
+                    els.popupTitle.style.color = "var(--danger)";
+                    els.rematchBarBox.classList.add("hidden");
+                    els.popupBtns.innerHTML = "";
+                    setTimeout(() => { els.popup.classList.add("hidden"); db.ref("rooms/"+roomId+"/rematch").remove(); }, 2000);
+                }
+                return;
+            }
+
+            // Hiển thị Popup mời
+            els.popup.classList.remove("hidden");
+            els.rematchBarBox.classList.remove("hidden");
+            
+            const bar = els.rematchBar;
+            bar.style.transition = 'none'; bar.style.width = '100%';
+            setTimeout(() => { bar.style.transition = `width linear ${5000 - (now - rematch.time)}ms`; bar.style.width = '0%'; }, 50);
+
+            if(rematch.from !== myRole) {
+                els.popupTitle.textContent = "🔥 THÁCH ĐẤU LẠI?";
+                els.popupTitle.style.color = "var(--gold)";
+                els.popupBtns.innerHTML = `
+                    <button onclick="acceptRematch()" style="background:var(--primary); margin:0">CHIẾN!</button>
+                    <button onclick="declineRematch()" style="background:#444; margin:0">THÔI</button>
+                `;
+            } else {
+                els.popupTitle.textContent = "⏳ ĐANG CHỜ...";
+                els.popupTitle.style.color = "#fff";
+                els.popupBtns.innerHTML = "";
+            }
+        }
+
+        window.acceptRematch = () => {
+            db.ref("rooms/"+roomId).transaction(r => {
+                if(r) { r.board=Array(r.boardSize*r.boardSize).fill(""); r.winner=null; r.turn="X"; r.startTime=Date.now(); r.turnTime=Date.now(); r.rematch=null; } return r;
+            });
+            els.popup.classList.add("hidden");
+        };
+        window.declineRematch = () => {
+            els.popup.classList.add("hidden");
+            db.ref("rooms/"+roomId+"/rematch").update({status: 'declined', time: firebase.database.ServerValue.TIMESTAMP});
+        };
+
+        // --- GAMEPLAY CORE (Giữ nguyên) ---
         function renderBoard(board, size, winner) {
             els.board.innerHTML = ""; els.board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
             const fSize = size>=15?"10px":(size>=10?"14px":"22px");
@@ -333,10 +521,17 @@
                 if(!winner) d.onclick = () => move(i); els.board.appendChild(d);
             });
         }
-
         function updateStatus(r) {
             clearInterval(timerInt);
-            if(!r.players?.X || !r.players?.O) { els.status.textContent = "⏳ Đang đợi..."; return; }
+            if(!r.players?.X || !r.players?.O) { 
+                els.status.textContent = "⏳ Đang đợi người vào..."; 
+                
+                // Nếu đối thủ thoát, reset nút kick
+                if(kickTimerInterval) { clearInterval(kickTimerInterval); kickTimerInterval=null; }
+                
+                return; 
+            }
+
             if(r.winner) {
                 els.status.innerHTML = r.winner==="draw"?"HÒA!":`<span style='color:${r.winner==='X'?'#4facfe':'#f093fb'}'>${r.players[r.winner].name} THẮNG!</span>`;
                 els.endControls.classList.remove("hidden"); els.timer.textContent = "END";
@@ -350,7 +545,6 @@
                 }, 1000);
             }
         }
-
         function move(i) {
             db.ref("rooms/"+roomId).once("value", snap => {
                 const r = snap.val();
@@ -367,65 +561,15 @@
             for(let [dx, dy] of dirs) { let c=1; for(let s=1; s<5; s++) if(b[(y+dy*s)*size+(x+dx*s)]===val) c++; else break; for(let s=1; s<5; s++) if(b[(y-dy*s)*size+(x-dx*s)]===val) c++; else break; if(c>=5) return true; } return false;
         }
 
-        // --- REMATCH LOGIC ---
         document.getElementById("btnRematch").onclick = () => {
             document.getElementById("btnRematch").textContent = "Đã gửi...";
             db.ref("rooms/"+roomId+"/rematch").set({from:myRole, status:'pending', time: firebase.database.ServerValue.TIMESTAMP});
         };
-
-        function handleRematch(rematch) {
-            if(!rematch) {
-                els.rematchOverlay.classList.add("hidden");
-                document.getElementById("btnRematch").textContent = "🔄 Ván Mới";
-                return;
-            }
-            const now = Date.now();
-            if(now - rematch.time > 5000) { 
-                if(rematch.from === myRole) db.ref("rooms/"+roomId+"/rematch").remove();
-                return;
-            }
-
-            els.rematchOverlay.classList.remove("hidden");
-            const bar = els.rematchProgress;
-            bar.style.transition = 'none'; bar.style.width = '100%';
-            setTimeout(() => { bar.style.transition = `width linear ${5000 - (now - rematch.time)}ms`; bar.style.width = '0%'; }, 50);
-
-            // LOGIC PENDING / DECLINED
-            if(rematch.status === 'pending') {
-                if(rematch.from !== myRole) {
-                    els.rematchTitle.textContent = "🔥 ĐỐI THỦ THÁCH ĐẤU!";
-                    els.rematchTitle.style.color = "var(--gold)";
-                    els.rematchButtons.classList.remove("hidden");
-                } else {
-                    els.rematchTitle.textContent = "⏳ Đang chờ phản hồi...";
-                    els.rematchTitle.style.color = "#fff";
-                    els.rematchButtons.classList.add("hidden");
-                }
-            } else if(rematch.status === 'declined') {
-                els.rematchTitle.textContent = "❌ ĐỐI THỦ ĐÃ TỪ CHỐI!";
-                els.rematchTitle.style.color = "var(--danger)";
-                els.rematchButtons.classList.add("hidden");
-            }
-
-            clearTimeout(rematchTimeout);
-            rematchTimeout = setTimeout(() => {
-                els.rematchOverlay.classList.add("hidden");
-                if(rematch.status === 'declined' && rematch.from === myRole) db.ref("rooms/"+roomId+"/rematch").remove();
-            }, 5000 - (now - rematch.time));
-        }
-
-        document.getElementById("btnAccept").onclick = () => {
-            db.ref("rooms/"+roomId).transaction(r => {
-                if(r) { r.board=Array(r.boardSize*r.boardSize).fill(""); r.winner=null; r.turn="X"; r.startTime=Date.now(); r.turnTime=Date.now(); r.rematch=null; } return r;
-            });
-            els.rematchOverlay.classList.add("hidden");
+        document.getElementById("btnLeave").onclick = () => { 
+            if(confirm("Bạn chắc chắn muốn thoát?")) { 
+                db.ref("rooms/"+roomId+"/players/"+myRole).remove().then(() => location.reload()); 
+            } 
         };
-
-        document.getElementById("btnDecline").onclick = () => {
-            db.ref("rooms/"+roomId+"/rematch").update({status: 'declined', time: firebase.database.ServerValue.TIMESTAMP});
-        };
-
-        document.getElementById("btnLeave").onclick = () => { if(confirm("Thoát?")) { db.ref("rooms/"+roomId+"/players/"+myRole).remove(); location.reload(); } };
     </script>
 </body>
 </html>
