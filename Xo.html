@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Caro Quantum - Final Perfect</title>
+    <title>Caro Quantum - Fixed Logic</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
@@ -414,20 +414,25 @@
         };
 
         function handleKickRequest(kickData) {
-            // Logic nhận phản hồi TỪ CHỐI
+            // --- FIX 2: ƯU TIÊN KIỂM TRA TÍN HIỆU TỪ CHỐI TRƯỚC ---
             if (kickData && kickData.status === 'refused') {
                 showToast("⚠️ Đối thủ từ chối ra ngoài!", "error");
+                
                 // Tự động xóa thông báo kick trên server sau 2s
+                // (Chỉ Host thực hiện xóa để tránh xung đột)
                 db.ref("rooms/"+roomId+"/players/"+myRole).once('value', snap => {
                     if(snap.val() && snap.val().isHost) {
                          setTimeout(() => db.ref("rooms/"+roomId+"/kick").remove(), 2000);
                     }
                 });
+
                 if(els.popupTitle.textContent.includes("ĐANG GỬI")) hidePopup();
                 return;
             }
 
+            // --- Sau đó mới lọc người nhận ---
             if(!kickData || kickData.target !== myRole) {
+                // Nếu popup đang hiện "BỊ MỜI RA" mà dữ liệu kick không còn (hoặc không phải cho mình) -> Tắt popup
                 if(els.popupTitle.textContent.includes("BỊ MỜI RA")) els.popup.classList.add('hidden');
                 return;
             }
@@ -462,11 +467,13 @@
         // ==========================================
 
         function handleRematch(rematch) {
+            // Không can thiệp nếu đang dùng popup để Quản lý phòng
             if(!els.popup.classList.contains('hidden') && 
                (els.popupTitle.textContent.includes("QUẢN LÝ") || els.popupTitle.textContent.includes("MỜI RA") || els.popupTitle.textContent.includes("ĐANG GỬI"))) return;
 
+            // --- FIX 1: TẮT LUÔN POPUP KHI BẮT ĐẦU VÁN MỚI (rematch == null) ---
             if(!rematch) {
-                if(els.popupTitle.textContent.includes("THÁCH ĐẤU")) els.popup.classList.add("hidden");
+                els.popup.classList.add("hidden");
                 document.getElementById("btnRematch").textContent = "🔄 Ván Mới";
                 return;
             }
