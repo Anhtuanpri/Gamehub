@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Caro Quantum - Final V4</title>
+    <title>Caro Quantum - Final V5 (Host Transfer)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
@@ -361,10 +361,14 @@
                 }
                 hasOpponent = !!isOpponentPresent;
 
-                // Logic 2: Host Migration
-                if(r.players && (!r.players.X || !r.players.O)) {
-                    if(r.players[myRole] && !r.players[myRole].isHost && !r.players[oppRole]) {
-                        db.ref("rooms/"+roomId+"/players/"+myRole).update({isHost: true});
+                // Logic 2: Host Transfer (Survivor Rule)
+                if(r.players && r.players[myRole]) {
+                    if(!r.players[myRole].isHost) {
+                        // Nếu đối thủ không tồn tại (đã thoát) -> Mình lên làm trùm
+                        if(!r.players[oppRole]) {
+                             db.ref("rooms/"+roomId+"/players/"+myRole).update({isHost: true});
+                             showToast("👑 Bạn đã trở thành Chủ phòng!", "success");
+                        }
                     }
                 }
 
@@ -483,7 +487,7 @@
 
         window.declineKick = () => {
             els.popup.classList.add('hidden');
-            // Gửi từ chối lên, target là chính mình để Host nhận biết
+            // Gửi tín hiệu TỪ CHỐI kèm theo target là CHÍNH MÌNH (để code trên nhận diện)
             db.ref("rooms/"+roomId+"/kick").update({ status: 'refused', target: myRole });
         };
 
