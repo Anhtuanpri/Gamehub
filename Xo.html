@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Caro Quantum - Final V6 (Logo & Fix Host)</title>
+    <title>Caro Quantum - Final V7 (PC Optimized)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
         body { overflow: hidden; background: #020205; font-family: 'Outfit', sans-serif; color: var(--text); height: 100vh; width: 100vw; }
         canvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
         
-        /* UI Layer */
+        /* UI Layer - Căn giữa tuyệt đối */
         #ui-layer { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             z-index: 10; 
@@ -32,7 +32,7 @@
         }
         #ui-layer.minimized { opacity: 0; transform: scale(0.8) translateY(100px); pointer-events: none; }
 
-        /* Buttons */
+        /* Buttons Control */
         #btnShowUI {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%) scale(0);
             width: 60px; height: 60px;
@@ -60,33 +60,38 @@
         #music-control.playing { border-color: var(--primary); box-shadow: 0 0 20px var(--primary); animation: pulseMusic 2s infinite; }
         @keyframes pulseMusic { 0%,100%{box-shadow:0 0 10px var(--primary)} 50%{box-shadow:0 0 25px var(--primary)} }
 
-        /* Game Panel */
+        /* --- GAME PANEL (Responsive) --- */
         .game-panel { 
-            pointer-events: auto; width: 90%; max-width: 420px; 
+            pointer-events: auto; 
+            width: 90%; 
+            max-width: 420px; /* Mobile Default */
             background: var(--glass-bg); backdrop-filter: blur(25px) saturate(200%); -webkit-backdrop-filter: blur(25px) saturate(200%);
             border: 1px solid var(--glass-border); border-top: 1px solid rgba(255,255,255,0.3); border-radius: 30px; 
-            padding: 30px 25px; box-shadow: 0 40px 80px rgba(0,0,0,0.6); 
+            padding: 25px 20px; 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6); 
             opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); position: relative; 
+            display: flex; flex-direction: column; justify-content: center;
         }
         .game-panel.active { opacity: 1; transform: translateY(0); }
-        
-        /* LOGO STYLE */
+
+        /* LOGO STYLE - Đã thu nhỏ */
         .game-logo {
-            width: 100%; max-width: 280px; display: block; margin: 0 auto 20px;
+            width: 100%; max-width: 150px; /* Bóp nhỏ logo */
+            display: block; margin: 0 auto 15px;
             filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.6));
             animation: floatLogo 3s ease-in-out infinite;
         }
         @keyframes floatLogo { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
 
-        input, select, button { width: 100%; padding: 16px; margin: 10px 0; background: rgba(255, 255, 255, 0.07); border: 1px solid var(--glass-border); border-radius: 16px; color: #fff; font-family: 'Outfit', sans-serif; font-size: 16px; outline: none; transition: 0.3s; }
+        input, select, button { width: 100%; padding: 14px; margin: 8px 0; background: rgba(255, 255, 255, 0.07); border: 1px solid var(--glass-border); border-radius: 14px; color: #fff; font-family: 'Outfit', sans-serif; font-size: 15px; outline: none; transition: 0.3s; }
         input:focus, select:focus { border-color: var(--primary); background: rgba(255,255,255,0.12); box-shadow: 0 0 15px rgba(102, 126, 234, 0.2); }
         select option { background: #0f172a; }
-        button { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; font-weight: 700; text-transform: uppercase; cursor: pointer; margin-top: 20px; box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); letter-spacing: 1px; }
+        button { background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; font-weight: 700; text-transform: uppercase; cursor: pointer; margin-top: 15px; box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); letter-spacing: 1px; }
         button:active { transform: scale(0.97); }
         .btn-red { background: rgba(255, 50, 50, 0.1); border: 1px solid rgba(255, 50, 50, 0.3); color: #ff8080; box-shadow: none; font-size: 13px; padding: 12px; margin-top: 10px; }
         
         /* Board */
-        #board-container { width: 100%; aspect-ratio: 1/1; margin: 20px auto; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); padding: 4px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        #board-container { width: 100%; aspect-ratio: 1/1; margin: 15px auto; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); padding: 4px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
         #board { display: grid; width: 100%; height: 100%; gap: 1px; }
         .cell { background: rgba(255,255,255,0.04); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; transition: background 0.2s; }
         .cell:active { background: rgba(255,255,255,0.1); }
@@ -94,6 +99,30 @@
         .cell.O { color: #f093fb; text-shadow: 0 0 12px #f093fb; }
         #status-bar { display: flex; justify-content: space-between; font-weight: 600; font-size: 15px; margin-top: 15px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; }
         
+        /* --- PC OPTIMIZATION (Media Query) --- */
+        @media (min-width: 1024px) {
+            .game-panel {
+                max-width: 550px; /* Tăng kích thước trên PC */
+                padding: 40px;
+                border-radius: 40px;
+            }
+            .game-logo {
+                max-width: 180px; /* Logo PC to hơn tí chút cho cân */
+            }
+            input, select, button {
+                padding: 18px;
+                font-size: 16px;
+                border-radius: 18px;
+            }
+            .cell {
+                font-size: 28px !important; /* Chữ XO to rõ trên màn PC */
+            }
+            #roomIdDisplay {
+                font-size: 16px !important;
+                padding: 12px !important;
+            }
+        }
+
         /* POPUP MODAL */
         .overlay-popup { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.92); z-index: 50; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); animation: fadeIn 0.3s ease; padding: 20px; text-align: center; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
@@ -105,10 +134,10 @@
         
         /* Kick Button */
         .btn-kick-user {
-            position: absolute; top: -10px; right: -10px; width: 24px; height: 24px;
+            position: absolute; top: -5px; right: -5px; width: 22px; height: 22px;
             background: var(--danger); border-radius: 50%; border: 2px solid #fff;
             color: white; display: flex; align-items: center; justify-content: center;
-            font-size: 14px; cursor: pointer; box-shadow: 0 0 10px var(--danger); z-index: 5;
+            font-size: 12px; cursor: pointer; box-shadow: 0 0 10px var(--danger); z-index: 5;
             transition: 0.3s;
         }
         .btn-kick-user:active { transform: scale(0.9); }
@@ -118,8 +147,8 @@
 
         /* Room ID Badge */
         #roomIdDisplay {
-            text-align: center; color: rgba(255,255,255,0.5); font-size: 14px; 
-            margin-bottom: 15px; background: rgba(255,255,255,0.05); 
+            text-align: center; color: rgba(255,255,255,0.5); font-size: 13px; 
+            margin-bottom: 10px; background: rgba(255,255,255,0.05); 
             padding: 8px; border-radius: 8px; cursor: pointer; border: 1px dashed rgba(255,255,255,0.2);
         }
         #roomIdDisplay:active { background: rgba(255,255,255,0.1); color: #fff; }
@@ -338,21 +367,19 @@
                 
                 let p = { name, ava, id: uid, isHost: false };
                 
-                // === FIX QUAN TRỌNG: CHECK HOST TRƯỚC KHI VÀO ===
-                const xExists = r.players.X && r.players.X.id;
-                const oExists = r.players.O && r.players.O.id;
+                // === CHECK HOST CẨN THẬN (Tránh 2 Vua) ===
+                const x = r.players.X;
+                const o = r.players.O;
                 
-                // Nếu phòng trống hoàn toàn -> Người đầu tiên là HOST
-                if (!xExists && !oExists) {
+                // 1. Kiểm tra xem phòng ĐÃ CÓ ai là Host chưa?
+                const existingHost = (x && x.isHost) || (o && o.isHost);
+
+                // 2. Nếu chưa có ai là Host (phòng trống hoặc Host cũ vừa out), thì mình làm Host
+                if (!existingHost) {
                     p.isHost = true;
-                } 
-                // Nếu có người khác rồi, và người đó đang là Host -> Mình KHÔNG ĐƯỢC làm Host
-                else if ((xExists && r.players.X.isHost) || (oExists && r.players.O.isHost)) {
+                } else {
+                    // Nếu đã có Host rồi, mình vào sau -> Không được làm Host
                     p.isHost = false;
-                }
-                // (Phòng hờ): Nếu có người kia, mà họ chưa kịp làm host -> Mình làm host (để đảm bảo phòng luôn có chủ)
-                else {
-                    p.isHost = true;
                 }
 
                 if(!r.players.X) { myRole="X"; r.players.X = p; } 
@@ -381,7 +408,6 @@
                 const oppRole = myRole==="X"?"O":"X";
                 const isOpponentPresent = r.players && r.players[oppRole];
 
-                // Logic 1: Thông báo khi đối thủ thoát
                 if (hasOpponent && !isOpponentPresent) {
                     showToast("🚪 Đối thủ đã rời phòng", "info");
                 }
@@ -389,18 +415,17 @@
 
                 // === LOGIC HOST MỚI (CHUYỂN GIAO TỨC THÌ) ===
                 if(r.players && r.players[myRole]) {
-                    // Nếu tôi đang trong phòng, mà tôi chưa là Host
+                    // Nếu tôi chưa là Host
                     if(!r.players[myRole].isHost) {
-                        // Kiểm tra nếu đối thủ không còn tồn tại
-                        if(!r.players[oppRole]) {
-                             // LẬP TỨC CHIẾM QUYỀN HOST
+                        // Và tôi không thấy đối thủ đâu cả (hoặc đối thủ không phải Host)
+                        // Trong trường hợp đối thủ out -> Tôi là người duy nhất -> Lên ngôi
+                        if(!isOpponentPresent) {
                              db.ref("rooms/"+roomId+"/players/"+myRole).update({isHost: true});
                              showToast("👑 Bạn đã trở thành Chủ phòng!", "success");
                         }
                     }
                 }
 
-                // Logic 3: CHECK KICK (Chỉ báo bị kích nếu mình không tự bấm thoát)
                 if(r.players && !r.players[myRole]) {
                     if(!isLeaving) {
                         alert("🚫 BẠN ĐÃ BỊ KÍCH KHỎI PHÒNG!");
