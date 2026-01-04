@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Caro Quantum - Final V5 (Host Transfer)</title>
+    <title>Caro Quantum - Final V6 (Logo & Fix Host)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
@@ -70,7 +70,14 @@
         }
         .game-panel.active { opacity: 1; transform: translateY(0); }
         
-        h2 { font-family: 'Orbitron', sans-serif; font-size: 32px; background: linear-gradient(135deg, #fff 20%, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-align: center; margin-bottom: 25px; text-shadow: 0 0 30px rgba(102, 126, 234, 0.6); letter-spacing: 2px; }
+        /* LOGO STYLE */
+        .game-logo {
+            width: 100%; max-width: 280px; display: block; margin: 0 auto 20px;
+            filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.6));
+            animation: floatLogo 3s ease-in-out infinite;
+        }
+        @keyframes floatLogo { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
         input, select, button { width: 100%; padding: 16px; margin: 10px 0; background: rgba(255, 255, 255, 0.07); border: 1px solid var(--glass-border); border-radius: 16px; color: #fff; font-family: 'Outfit', sans-serif; font-size: 16px; outline: none; transition: 0.3s; }
         input:focus, select:focus { border-color: var(--primary); background: rgba(255,255,255,0.12); box-shadow: 0 0 15px rgba(102, 126, 234, 0.2); }
         select option { background: #0f172a; }
@@ -132,7 +139,9 @@
         
         <div id="home" class="game-panel">
             <button class="btn-close-ui" onclick="hideUI()">✕</button>
-            <h2>CARO QUANTUM</h2>
+            
+            <img src="https://i.ibb.co/7dH7bbgJ/file-0000000029007206a9ef63a171b1b0bd-removebg-preview.png" class="game-logo" alt="Caro Quantum">
+
             <div id="previewArea" class="hidden">
                 <div class="avatar-box"><img id="previewImg" class="main" src=""><img class="frame" src="https://i.postimg.cc/FFqqqbzz/khung-vip-303.gif"></div>
             </div>
@@ -328,12 +337,29 @@
                 if(!r) r = { boardSize: size, board: Array(size*size).fill(""), players:{}, turn:"X", startTime: NOW, turnTime: NOW };
                 
                 let p = { name, ava, id: uid, isHost: false };
-                if(!r.players.X) { p.isHost = true; myRole="X"; r.players.X = p; } 
-                else if(!r.players.O) { p.isHost = false; myRole="O"; r.players.O = p; }
+                
+                // === FIX QUAN TRỌNG: CHECK HOST TRƯỚC KHI VÀO ===
+                const xExists = r.players.X && r.players.X.id;
+                const oExists = r.players.O && r.players.O.id;
+                
+                // Nếu phòng trống hoàn toàn -> Người đầu tiên là HOST
+                if (!xExists && !oExists) {
+                    p.isHost = true;
+                } 
+                // Nếu có người khác rồi, và người đó đang là Host -> Mình KHÔNG ĐƯỢC làm Host
+                else if ((xExists && r.players.X.isHost) || (oExists && r.players.O.isHost)) {
+                    p.isHost = false;
+                }
+                // (Phòng hờ): Nếu có người kia, mà họ chưa kịp làm host -> Mình làm host (để đảm bảo phòng luôn có chủ)
+                else {
+                    p.isHost = true;
+                }
+
+                if(!r.players.X) { myRole="X"; r.players.X = p; } 
+                else if(!r.players.O) { myRole="O"; r.players.O = p; }
                 else if(r.players.X.id===uid) { myRole="X"; r.players.X.name=name; r.players.X.avatar=ava; }
                 else if(r.players.O.id===uid) { myRole="O"; r.players.O.name=name; r.players.O.avatar=ava; }
                 
-                // Reset timer nếu có người thứ 2 vào
                 if(r.players.X && r.players.O && (!r.gameStarted)) {
                     r.gameStarted = true;
                     r.turnTime = NOW; 
@@ -361,11 +387,13 @@
                 }
                 hasOpponent = !!isOpponentPresent;
 
-                // Logic 2: Host Transfer (Survivor Rule)
+                // === LOGIC HOST MỚI (CHUYỂN GIAO TỨC THÌ) ===
                 if(r.players && r.players[myRole]) {
+                    // Nếu tôi đang trong phòng, mà tôi chưa là Host
                     if(!r.players[myRole].isHost) {
-                        // Nếu đối thủ không tồn tại (đã thoát) -> Mình lên làm trùm
+                        // Kiểm tra nếu đối thủ không còn tồn tại
                         if(!r.players[oppRole]) {
+                             // LẬP TỨC CHIẾM QUYỀN HOST
                              db.ref("rooms/"+roomId+"/players/"+myRole).update({isHost: true});
                              showToast("👑 Bạn đã trở thành Chủ phòng!", "success");
                         }
